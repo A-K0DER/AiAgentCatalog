@@ -1,0 +1,45 @@
+---
+import Icon from "./Icon.astro";
+
+export interface FaqItem {
+  question: string;
+  answer: string;
+}
+
+interface Props {
+  items: FaqItem[];
+}
+
+const { items } = Astro.props;
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: items.map((item) => ({
+    "@type": "Question",
+    name: item.question,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: `<p>${item.answer}</p>`,
+    },
+  })),
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+
+<div class="divide-y divide-hairline rounded-md border border-hairline bg-canvas">
+  {items.map((item) => (
+    <details class="group px-lg py-md">
+      <summary class="flex cursor-pointer list-none items-center justify-between gap-md text-body-md-strong text-ink [&::-webkit-details-marker]:hidden">
+        {item.question}
+        <Icon
+          name="chevron-down"
+          size={18}
+          class="shrink-0 text-mute transition-transform duration-150 group-open:rotate-180"
+        />
+      </summary>
+      <p class="mt-sm max-w-[54rem] text-body-sm text-body">{item.answer}</p>
+    </details>
+  ))}
+</div>
