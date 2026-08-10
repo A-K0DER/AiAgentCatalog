@@ -1,0 +1,84 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Section from "../../components/Section.astro";
+
+const lastUpdated = "August 11, 2026";
+const contactEmail = "hello@skillforagents.com";
+
+const sections = [
+  {
+    title: "What this policy covers",
+    body: [
+      "This policy describes what information SkillForAgents (\"we\", \"us\") collects when you visit skillforagents.com, why we collect it, and what control you have over it. We built this catalog to be as low-friction as possible, and that extends to how little of your data we touch.",
+    ],
+  },
+  {
+    title: "Information we collect",
+    body: [
+      "There are no user accounts, no sign-ups, and no forms that store personal data on this site. We don't collect names, email addresses, or payment information through normal browsing.",
+      "Our hosting and CDN providers automatically log standard technical data for every request — IP address, browser user agent, requested URL, and timestamp — as most web infrastructure does. We use these logs only for security, abuse prevention, and diagnosing outages, and we don't cross-reference them with any other data source.",
+    ],
+  },
+  {
+    title: "Cookies and local storage",
+    body: [
+      "We don't use tracking or advertising cookies. The only client-side data we store is a single local storage entry that remembers whether you prefer light or dark mode — it stays on your device, is never transmitted to us, and isn't used to identify you.",
+    ],
+  },
+  {
+    title: "Analytics",
+    body: [
+      "We don't currently run third-party analytics or advertising scripts on this site. If that changes, we'll update this policy first and favor privacy-respecting, non-tracking analytics tools.",
+    ],
+  },
+  {
+    title: "GitHub-hosted submissions",
+    body: [
+      "Catalog submissions and issue reports are handled through public GitHub issues rather than a form on this site. Anything you post there — including your GitHub username and issue content — is subject to GitHub's own privacy policy and is publicly visible, since that's how GitHub issues work.",
+    ],
+  },
+  {
+    title: "Third-party links",
+    body: [
+      "Listings link out to external repositories, package registries, and vendor documentation. Once you leave skillforagents.com, that destination's own privacy policy applies — we don't control and aren't responsible for how third-party sites handle your data.",
+    ],
+  },
+  {
+    title: "Children's privacy",
+    body: [
+      "This site is a technical reference for developers and isn't directed at children. We don't knowingly collect information from anyone under 13.",
+    ],
+  },
+  {
+    title: "Changes to this policy",
+    body: [
+      "If this policy changes materially, we'll update the date below. Continued use of the site after a change means you accept the revised policy.",
+    ],
+  },
+  {
+    title: "Contact",
+    body: [`Questions about this policy can be sent to ${contactEmail}.`],
+  },
+];
+---
+
+<Layout
+  title="Privacy Policy"
+  description="How SkillForAgents handles data: no accounts, no tracking cookies, minimal server logs, and GitHub-hosted submissions."
+  keywords={["SkillForAgents privacy policy", "AI agent skills directory privacy"]}
+>
+  <Section
+    eyebrow="Legal"
+    title="Privacy Policy"
+    description={`Last updated ${lastUpdated}. We collect as little as we can get away with — here's exactly what that is.`}
+  >
+    <div class="flex flex-col gap-2xl">
+      {sections.map((s) => (
+        <div class="flex flex-col gap-sm">
+          <h2 class="text-display-sm text-ink">{s.title}</h2>
+          {s.body.map((p) => <p class="max-w-[52rem] text-body-md text-body">{p}</p>)}
+        </div>
+      ))}
+    </div>
+  </Section>
+</Layout>

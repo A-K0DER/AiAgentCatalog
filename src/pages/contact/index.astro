@@ -1,0 +1,75 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Section from "../../components/Section.astro";
+import Button from "../../components/Button.astro";
+import Icon from "../../components/Icon.astro";
+
+const contactEmail = "hello@skillforagents.com";
+const issueUrl = "https://github.com/A-K0DER/AgentCatalog/issues/new";
+const submissionIssueUrl =
+  "https://github.com/A-K0DER/AgentCatalog/issues/new?template=submit-listing.yml&labels=submission";
+
+const channels = [
+  {
+    icon: "mail",
+    label: "General inquiries",
+    detail: "Questions about the catalog, partnership inquiries, or anything that doesn't fit the categories below.",
+    action: { href: `mailto:${contactEmail}`, label: contactEmail },
+  },
+  {
+    icon: "box",
+    label: "Submit a listing",
+    detail: "Adding a new skill or MCP server to the catalog goes through a structured GitHub issue, not email.",
+    action: { href: submissionIssueUrl, label: "Open submission issue" },
+  },
+  {
+    icon: "alert-triangle",
+    label: "Report an issue",
+    detail: "Broken links, outdated metadata, an incorrect verification status, or a listing that should be removed.",
+    action: { href: issueUrl, label: "Open a GitHub issue" },
+  },
+];
+---
+
+<Layout
+  title="Contact Us"
+  description="Get in touch with SkillForAgents — report an issue, ask a question, or submit a Claude agent skill or MCP server to the directory."
+  keywords={["contact SkillForAgents", "AI agent skills directory support", "report a listing"]}
+>
+  <Section
+    eyebrow="Contact"
+    title="Get in touch"
+    description="Most things are faster over GitHub since they're public and searchable, but email works too. Pick whichever fits below."
+  >
+    <div class="grid grid-cols-1 gap-md sm:grid-cols-3">
+      {channels.map((c) => (
+        <div class="flex flex-col gap-sm rounded-md border border-hairline bg-canvas p-lg">
+          <Icon name={c.icon} size={20} class="text-link" />
+          <h2 class="text-body-md-strong text-ink">{c.label}</h2>
+          <p class="flex-1 text-body-sm text-body">{c.detail}</p>
+          <a
+            href={c.action.href}
+            class="text-body-sm text-link hover:underline"
+            target={c.action.href.startsWith("http") ? "_blank" : undefined}
+            rel={c.action.href.startsWith("http") ? "noopener noreferrer" : undefined}
+          >
+            {c.action.label} →
+          </a>
+        </div>
+      ))}
+    </div>
+  </Section>
+
+  <Section eyebrow="Response time" title="What to expect" soft>
+    <div class="flex flex-col gap-md">
+      <p class="max-w-[42rem] text-body-md text-body">
+        SkillForAgents is run by a small, independent team, so replies typically land within a
+        few business days. GitHub issues are usually faster than email since they don't require
+        triage out of an inbox.
+      </p>
+      <Button href={`mailto:${contactEmail}`} variant="secondary" class="w-fit">
+        <Icon name="mail" size={16} /> Email us directly
+      </Button>
+    </div>
+  </Section>
+</Layout>

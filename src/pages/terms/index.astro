@@ -1,0 +1,85 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Section from "../../components/Section.astro";
+
+const lastUpdated = "August 11, 2026";
+const contactEmail = "hello@skillforagents.com";
+
+const sections = [
+  {
+    title: "Acceptance of terms",
+    body: [
+      "By using skillforagents.com, you agree to these terms. If you don't agree, don't use the site. We may update these terms occasionally; the \"last updated\" date below tracks the current version.",
+    ],
+  },
+  {
+    title: "What this site is",
+    body: [
+      "SkillForAgents is an independent, community-curated catalog of Claude Agent Skills and Model Context Protocol (MCP) servers. Listings link to third-party repositories, packages, and documentation that we don't own or control.",
+      "We are not affiliated with, endorsed by, or operated by Anthropic, GitHub, or any vendor whose tooling appears in the catalog. Product names, logos, and trademarks referenced belong to their respective owners.",
+    ],
+  },
+  {
+    title: "No warranty on listings",
+    body: [
+      "Verification status (verified, community, or unverified — explained on our About page) describes what we checked at the time of listing, not an ongoing guarantee. Third-party skills and MCP servers can change, break, or be abandoned without notice. Review any tool's source, permissions, and required credentials yourself before installing it into an agent or granting it access to your systems.",
+      "We provide catalog information \"as is\" without warranties of any kind, express or implied, including accuracy, completeness, or fitness for a particular purpose.",
+    ],
+  },
+  {
+    title: "Acceptable use",
+    body: [
+      "Don't scrape the site at a rate that degrades it for other users, attempt to bypass access controls, or use the catalog to distribute malware or misrepresent a listing's origin. Submissions and issue reports should be accurate and made in good faith.",
+    ],
+  },
+  {
+    title: "User-submitted content",
+    body: [
+      "Listing submissions and corrections are made through public GitHub issues. By submitting one, you confirm you have the right to share that information and grant us permission to use it to create or update a catalog listing. We may edit, decline, or remove any submission at our discretion.",
+    ],
+  },
+  {
+    title: "Limitation of liability",
+    body: [
+      "To the fullest extent permitted by law, SkillForAgents and its maintainers aren't liable for any damages arising from your use of this site or reliance on catalog information, including damages resulting from third-party tools you discover through it.",
+    ],
+  },
+  {
+    title: "Changes to the service",
+    body: [
+      "We may add, remove, or modify listings, features, or the site itself at any time without notice.",
+    ],
+  },
+  {
+    title: "Governing terms",
+    body: [
+      "These terms are governed by the laws applicable to the jurisdiction in which the site operator resides, without regard to conflict-of-law principles.",
+    ],
+  },
+  {
+    title: "Contact",
+    body: [`Questions about these terms can be sent to ${contactEmail}.`],
+  },
+];
+---
+
+<Layout
+  title="Terms & Conditions"
+  description="Terms of use for SkillForAgents, the independent catalog of Claude Agent Skills and MCP servers."
+  keywords={["SkillForAgents terms of service", "AI agent skills directory terms"]}
+>
+  <Section
+    eyebrow="Legal"
+    title="Terms & Conditions"
+    description={`Last updated ${lastUpdated}.`}
+  >
+    <div class="flex flex-col gap-2xl">
+      {sections.map((s) => (
+        <div class="flex flex-col gap-sm">
+          <h2 class="text-display-sm text-ink">{s.title}</h2>
+          {s.body.map((p) => <p class="max-w-[52rem] text-body-md text-body">{p}</p>)}
+        </div>
+      ))}
+    </div>
+  </Section>
+</Layout>

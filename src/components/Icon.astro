@@ -167,6 +167,12 @@ const { name, size = 20, class: className = "" } = Astro.props;
       stroke="none"
     />
   )}
+  {name === "mail" && (
+    <>
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <path d="m4 7 8 6 8-6" />
+    </>
+  )}
   {name === "copy" && (
     <>
       <rect x="9" y="9" width="11" height="11" rx="1.5" />
