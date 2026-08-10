@@ -1,5 +1,20 @@
+export const CATEGORY_SLUGS = [
+  "web-scraping",
+  "database-administration",
+  "devops-cicd",
+  "browser-automation",
+  "search-research",
+  "full-stack-coding",
+  "documents-files",
+  "communication",
+  "data-analytics",
+  "productivity-memory",
+] as const;
+
+export type CategorySlug = (typeof CATEGORY_SLUGS)[number];
+
 export interface Category {
-  slug: string;
+  slug: CategorySlug;
   label: string;
   description: string;
   blurb: string;
@@ -88,13 +103,6 @@ export const CATEGORIES = [
     icon: "brain",
   },
 ] as const satisfies readonly Category[];
-
-export type CategorySlug = (typeof CATEGORIES)[number]["slug"];
-
-export const CATEGORY_SLUGS = CATEGORIES.map((c) => c.slug) as [
-  CategorySlug,
-  ...CategorySlug[],
-];
 
 export function getCategory(slug: string): Category | undefined {
   return CATEGORIES.find((c) => c.slug === slug);

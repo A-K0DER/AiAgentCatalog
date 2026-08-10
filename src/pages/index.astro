@@ -7,7 +7,7 @@ import EntryCard from "../components/EntryCard.astro";
 import Button from "../components/Button.astro";
 import Icon from "../components/Icon.astro";
 import Faq from "../components/Faq.astro";
-import { CATEGORIES } from "../data/categories";
+import { CATEGORIES, type CategorySlug } from "../data/categories";
 
 const skills = await getCollection("skills");
 const mcps = await getCollection("mcps");
@@ -15,7 +15,7 @@ const mcps = await getCollection("mcps");
 const featuredSkills = skills.filter((s) => s.data.featured).slice(0, 3);
 const featuredMcps = mcps.filter((m) => m.data.featured).slice(0, 3);
 
-function categoryCount(slug: string) {
+function categoryCount(slug: CategorySlug) {
   return (
     skills.filter((s) => s.data.categories.includes(slug)).length +
     mcps.filter((m) => m.data.categories.includes(slug)).length

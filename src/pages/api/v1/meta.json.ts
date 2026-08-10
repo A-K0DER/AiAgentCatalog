@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import { getCollection } from "astro:content";
-import { CATEGORIES } from "../../../data/categories";
+import { CATEGORIES, type CategorySlug } from "../../../data/categories";
 import { CLIENTS } from "../../../data/clients";
 import { RUNTIMES } from "../../../data/runtimes";
 
@@ -8,7 +8,7 @@ export const GET: APIRoute = async ({ site }) => {
   const skills = await getCollection("skills");
   const mcps = await getCollection("mcps");
 
-  function categoryCount(slug: string) {
+  function categoryCount(slug: CategorySlug) {
     return (
       skills.filter((s) => s.data.categories.includes(slug)).length +
       mcps.filter((m) => m.data.categories.includes(slug)).length
