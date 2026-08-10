@@ -1,0 +1,19 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Button from "../components/Button.astro";
+---
+
+<Layout title="Server Error" description="Something went wrong on our end." noIndex>
+  <section class="container-page flex flex-col items-start gap-md py-5xl">
+    <span class="font-mono text-caption-mono text-mute">500</span>
+    <h1 class="text-display-xl text-ink">Something went wrong.</h1>
+    <p class="max-w-[32rem] text-body-lg text-body">
+      An unexpected error occurred on our end. Try refreshing the page, or head back home if the
+      problem persists.
+    </p>
+    <div class="flex flex-wrap gap-md">
+      <Button href="/" variant="primary">Back to Home</Button>
+      <Button href="/skills/" variant="secondary">Browse Skills</Button>
+    </div>
+  </section>
+</Layout>
