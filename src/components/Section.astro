@@ -1,0 +1,33 @@
+---
+interface Props {
+  eyebrow?: string;
+  title?: string;
+  description?: string;
+  soft?: boolean;
+  dark?: boolean;
+  class?: string;
+}
+
+const { eyebrow, title, description, soft = false, dark = false, class: className = "" } = Astro.props;
+
+const bg = dark ? "bg-primary text-on-primary" : soft ? "bg-canvas-soft" : "bg-canvas";
+---
+
+<section class={`${bg} py-4xl sm:py-5xl`}>
+  <div class={`container-page ${className}`}>
+    {(eyebrow || title || description) && (
+      <div class="mb-2xl flex flex-col gap-sm">
+        {eyebrow && (
+          <span class={`font-mono text-caption-mono uppercase tracking-wide ${dark ? "text-on-primary/50" : "text-mute"}`}>
+            {eyebrow}
+          </span>
+        )}
+        {title && <h2 class="text-display-lg">{title}</h2>}
+        {description && (
+          <p class={`max-w-[42rem] text-body-lg ${dark ? "text-on-primary/70" : "text-body"}`}>{description}</p>
+        )}
+      </div>
+    )}
+    <slot />
+  </div>
+</section>

@@ -1,0 +1,110 @@
+---
+import type { CollectionEntry } from "astro:content";
+import Icon from "./Icon.astro";
+import { getClientLabel } from "../data/clients";
+import { getRuntimeLabel } from "../data/runtimes";
+
+interface Props {
+  entry: CollectionEntry<"skills"> | CollectionEntry<"mcps">;
+}
+
+const { entry } = Astro.props;
+const { runtime, envVars, clients, license, pricing, sourceUrl, homepageUrl, author } = entry.data;
+
+const pricingLabel = { free: "Free", freemium: "Freemium", paid: "Paid" }[pricing];
+---
+
+<div class="overflow-hidden rounded-lg border border-hairline">
+  {runtime.length > 0 && (
+    <div class="grid grid-cols-1 gap-xxs border-b border-hairline px-lg py-md sm:grid-cols-[160px_1fr] sm:gap-md">
+      <span class="font-mono text-caption-mono uppercase text-mute">Runtime</span>
+      <div class="flex flex-wrap gap-xs">
+        {runtime.map((r) => (
+          <span class="inline-flex items-center gap-1 rounded-sm bg-canvas-soft-2 px-xs py-xxs font-mono text-caption-mono text-body">
+            <Icon name="terminal" size={12} />
+            {getRuntimeLabel(r)}
+          </span>
+        ))}
+      </div>
+    </div>
+  )}
+
+  <div class="grid grid-cols-1 gap-xxs border-b border-hairline px-lg py-md sm:grid-cols-[160px_1fr] sm:gap-md">
+    <span class="font-mono text-caption-mono uppercase text-mute">Client compatibility</span>
+    <div class="flex flex-wrap gap-xs">
+      {clients.map((c) => (
+        <span class="rounded-full bg-canvas-soft px-xs py-xxs text-caption text-body">{getClientLabel(c)}</span>
+      ))}
+    </div>
+  </div>
+
+  <div class="border-b border-hairline px-lg py-md">
+    <span class="mb-xs block font-mono text-caption-mono uppercase text-mute">
+      Required environment variables
+    </span>
+    {envVars.length === 0 ? (
+      <p class="text-body-sm text-body">None — works without any API keys or configuration.</p>
+    ) : (
+      <ul class="flex flex-col gap-sm">
+        {envVars.map((v) => (
+          <li class="border-t border-hairline pt-sm first:border-t-0 first:pt-0">
+            <div class="flex flex-wrap items-center gap-xs">
+              <span class="font-mono text-code text-ink break-all">{v.name}</span>
+              <span
+                class={`rounded-full px-xs py-xxs text-caption ${
+                  v.required ? "bg-error-soft text-error-deep" : "bg-canvas-soft text-body"
+                }`}
+              >
+                {v.required ? "Required" : "Optional"}
+              </span>
+            </div>
+            {v.description && <p class="mt-xxs text-body-sm text-body">{v.description}</p>}
+          </li>
+        ))}
+      </ul>
+    )}
+  </div>
+
+  <div class="grid grid-cols-1 gap-xxs border-b border-hairline px-lg py-md sm:grid-cols-[160px_1fr] sm:gap-md">
+    <span class="font-mono text-caption-mono uppercase text-mute">Pricing</span>
+    <span class="text-body-sm text-ink">{pricingLabel}</span>
+  </div>
+
+  {license && (
+    <div class="grid grid-cols-1 gap-xxs border-b border-hairline px-lg py-md sm:grid-cols-[160px_1fr] sm:gap-md">
+      <span class="font-mono text-caption-mono uppercase text-mute">License</span>
+      <span class="text-body-sm text-ink">{license}</span>
+    </div>
+  )}
+
+  {author && (
+    <div class="grid grid-cols-1 gap-xxs border-b border-hairline px-lg py-md sm:grid-cols-[160px_1fr] sm:gap-md">
+      <span class="font-mono text-caption-mono uppercase text-mute">Author</span>
+      <span class="text-body-sm text-ink">{author}</span>
+    </div>
+  )}
+
+  <div class="grid grid-cols-1 gap-xxs px-lg py-md sm:grid-cols-[160px_1fr] sm:gap-md">
+    <span class="font-mono text-caption-mono uppercase text-mute">Source</span>
+    <div class="flex flex-wrap gap-md">
+      <a
+        href={sourceUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center gap-1 text-body-sm text-link hover:underline"
+      >
+        Repository <Icon name="external-link" size={14} />
+      </a>
+      {homepageUrl && (
+        <a
+          href={homepageUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-1 text-body-sm text-link hover:underline"
+        >
+          Homepage <Icon name="external-link" size={14} />
+        </a>
+      )}
+    </div>
+  </div>
+</div>

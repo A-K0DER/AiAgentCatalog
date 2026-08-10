@@ -1,0 +1,133 @@
+name: Submit a Listing
+description: Submit a Claude Agent Skill or MCP server for inclusion in the catalog.
+title: "[Submission]: "
+labels: ["submission"]
+body:
+  - type: dropdown
+    id: type
+    attributes:
+      label: Listing type
+      options:
+        - Agent Skill
+        - MCP Server
+    validations:
+      required: true
+
+  - type: input
+    id: name
+    attributes:
+      label: Name
+      description: What is it called?
+    validations:
+      required: true
+
+  - type: input
+    id: tagline
+    attributes:
+      label: Tagline
+      description: One sentence describing what it does (max 140 characters).
+    validations:
+      required: true
+
+  - type: input
+    id: source
+    attributes:
+      label: Source repository URL
+      description: Public GitHub repository we can verify the listing against.
+      placeholder: "https://github.com/owner/repo"
+    validations:
+      required: true
+
+  - type: input
+    id: homepage
+    attributes:
+      label: Homepage URL (optional)
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: categories
+    attributes:
+      label: Categories
+      description: Select every use-case category this listing fits.
+      options:
+        - label: Web Scraping
+        - label: Database Administration
+        - label: DevOps & CI/CD
+        - label: Browser Automation
+        - label: Search & Research
+        - label: Full-Stack Coding
+        - label: Documents & Files
+        - label: Communication
+        - label: Data & Analytics
+        - label: Productivity & Memory
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: runtime
+    attributes:
+      label: Runtime (MCP servers only)
+      description: How is it run?
+      options:
+        - label: npx
+        - label: Docker
+        - label: uv / Python
+        - label: Node.js
+        - label: Binary
+        - label: Cloud / remote (no local runtime)
+    validations:
+      required: false
+
+  - type: textarea
+    id: env-vars
+    attributes:
+      label: Required environment variables
+      description: List every API key or config value needed, one per line, and whether it's required or optional.
+      placeholder: |
+        GITHUB_PERSONAL_ACCESS_TOKEN (required) — a GitHub token with repo scope
+        GITHUB_HOST (optional) — for GitHub Enterprise instances
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: clients
+    attributes:
+      label: Client compatibility
+      description: Which clients is this confirmed to work with?
+      options:
+        - label: Claude Desktop
+        - label: Claude Code CLI
+        - label: Cursor
+        - label: Windsurf
+        - label: VS Code
+        - label: Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: pricing
+    attributes:
+      label: Pricing
+      options:
+        - Free
+        - Freemium
+        - Paid
+    validations:
+      required: true
+
+  - type: input
+    id: license
+    attributes:
+      label: License
+      placeholder: "MIT, Apache-2.0, source-available, etc."
+    validations:
+      required: false
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A few paragraphs describing what it does and why it's useful. This becomes the listing's detail page content.
+    validations:
+      required: true

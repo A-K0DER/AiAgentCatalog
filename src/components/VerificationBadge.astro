@@ -1,0 +1,24 @@
+---
+import Badge from "./Badge.astro";
+import Icon from "./Icon.astro";
+
+interface Props {
+  status: "verified" | "community" | "unverified";
+  class?: string;
+}
+
+const { status, class: className = "" } = Astro.props;
+
+const config = {
+  verified: { variant: "link" as const, icon: "check", label: "Verified" },
+  community: { variant: "default" as const, icon: "shield", label: "Community" },
+  unverified: { variant: "warning" as const, icon: "alert-triangle", label: "Unverified" },
+};
+
+const { variant, icon, label } = config[status];
+---
+
+<Badge variant={variant} class={className}>
+  <Icon name={icon} size={12} />
+  {label}
+</Badge>

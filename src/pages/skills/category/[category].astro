@@ -1,0 +1,68 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../../layouts/Layout.astro";
+import Section from "../../../components/Section.astro";
+import EntryCard from "../../../components/EntryCard.astro";
+import Breadcrumbs from "../../../components/Breadcrumbs.astro";
+import CategoryPill from "../../../components/CategoryPill.astro";
+import { CATEGORIES, getCategory } from "../../../data/categories";
+
+export async function getStaticPaths() {
+  return CATEGORIES.map((cat) => ({ params: { category: cat.slug } }));
+}
+
+const { category } = Astro.params;
+const cat = getCategory(category)!;
+
+const allSkills = await getCollection("skills");
+const entries = allSkills
+  .filter((s) => s.data.categories.includes(cat.slug))
+  .sort((a, b) => b.data.addedDate.valueOf() - a.data.addedDate.valueOf());
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Skills", item: new URL("/skills/", Astro.site).toString() },
+    { "@type": "ListItem", position: 2, name: cat.label },
+  ],
+};
+---
+
+<Layout
+  title={`${cat.label} Skills`}
+  description={`Claude Agent Skills for ${cat.label.toLowerCase()}. ${cat.description}`}
+  jsonLd={jsonLd}
+>
+  <Section>
+    <Breadcrumbs
+      items={[{ label: "Skills", href: "/skills/" }, { label: cat.label }]}
+      class="mb-lg"
+    />
+    <h1 class="text-display-lg text-ink">{cat.label} Skills</h1>
+    <p class="mt-sm max-w-[42rem] text-body-lg text-body">{cat.description}</p>
+    <p class="mt-xxs text-body-sm text-mute">{cat.blurb}</p>
+
+    <div class="mt-xl flex flex-wrap gap-xs">
+      <CategoryPill href="/skills/">All Skills</CategoryPill>
+      {CATEGORIES.map((c) => (
+        <CategoryPill href={`/skills/category/${c.slug}/`} active={c.slug === cat.slug}>
+          {c.label}
+        </CategoryPill>
+      ))}
+    </div>
+
+    {entries.length > 0 ? (
+      <div class="mt-xl grid grid-cols-1 gap-lg sm:grid-cols-2 lg:grid-cols-3">
+        {entries.map((entry) => <EntryCard entry={entry} type="skills" />)}
+      </div>
+    ) : (
+      <div class="mt-xl rounded-lg border border-dashed border-hairline-strong px-lg py-3xl text-center">
+        <p class="text-body-md-strong text-ink">No Skills listed here yet</p>
+        <p class="mt-xxs text-body-sm text-body">
+          Know one that fits? <a href="/submit/" class="text-link hover:underline">Submit a listing</a>.
+        </p>
+      </div>
+    )}
+  </Section>
+</Layout>

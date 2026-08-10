@@ -1,0 +1,21 @@
+---
+interface Props {
+  href: string;
+  active?: boolean;
+  class?: string;
+}
+
+const { href, active = false, class: className = "" } = Astro.props;
+
+const classes = active
+  ? "bg-primary text-on-primary border-primary"
+  : "bg-canvas text-ink border-hairline hover:bg-canvas-soft";
+---
+
+<a
+  href={href}
+  class={`inline-flex items-center h-8 px-md rounded-pill-sm border text-body-sm whitespace-nowrap transition-colors duration-150 ${classes} ${className}`}
+  aria-current={active ? "page" : undefined}
+>
+  <slot />
+</a>

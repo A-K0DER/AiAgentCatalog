@@ -1,0 +1,48 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import Section from "../../components/Section.astro";
+import FilterBar from "../../components/FilterBar.astro";
+import EntryCard from "../../components/EntryCard.astro";
+
+const skills = (await getCollection("skills")).sort(
+  (a, b) => b.data.addedDate.valueOf() - a.data.addedDate.valueOf(),
+);
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  name: "Claude Agent Skills",
+  itemListElement: skills.map((s, i) => ({
+    "@type": "ListItem",
+    position: i + 1,
+    url: new URL(`/skills/${s.id}/`, Astro.site).toString(),
+    name: s.data.name,
+  })),
+};
+---
+
+<Layout
+  title="Browse Claude Agent Skills"
+  description="Every Claude Agent Skill in the catalog, filterable by category, client compatibility, and pricing — with verification status on every listing."
+  jsonLd={jsonLd}
+>
+  <Section
+    eyebrow="Agent Skills"
+    title="Browse Skills"
+    description="Instructions, scripts, and resources Claude loads on demand to handle a specific task well — documents, design, testing, and more."
+  >
+    <FilterBar type="skills" />
+    <div class="mt-xl grid grid-cols-1 gap-lg sm:grid-cols-2 lg:grid-cols-3">
+      {skills.map((entry) => <EntryCard entry={entry} type="skills" />)}
+    </div>
+    <div
+      id="empty-state"
+      hidden
+      class="mt-xl rounded-lg border border-dashed border-hairline-strong px-lg py-3xl text-center"
+    >
+      <p class="text-body-md-strong text-ink">No results match your filters</p>
+      <p class="mt-xxs text-body-sm text-body">Try clearing a filter or searching a different term.</p>
+    </div>
+  </Section>
+</Layout>

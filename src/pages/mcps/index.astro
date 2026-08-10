@@ -1,0 +1,48 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import Section from "../../components/Section.astro";
+import FilterBar from "../../components/FilterBar.astro";
+import EntryCard from "../../components/EntryCard.astro";
+
+const mcps = (await getCollection("mcps")).sort(
+  (a, b) => b.data.addedDate.valueOf() - a.data.addedDate.valueOf(),
+);
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  name: "MCP Servers",
+  itemListElement: mcps.map((m, i) => ({
+    "@type": "ListItem",
+    position: i + 1,
+    url: new URL(`/mcps/${m.id}/`, Astro.site).toString(),
+    name: m.data.name,
+  })),
+};
+---
+
+<Layout
+  title="Browse MCP Servers"
+  description="Every Model Context Protocol server in the catalog, filterable by category, runtime, client compatibility, and pricing — with verification status on every listing."
+  jsonLd={jsonLd}
+>
+  <Section
+    eyebrow="MCP Servers"
+    title="Browse MCPs"
+    description="Model Context Protocol servers that connect an agent to a real system — a database, a browser, an API — over a standard interface."
+  >
+    <FilterBar type="mcps" />
+    <div class="mt-xl grid grid-cols-1 gap-lg sm:grid-cols-2 lg:grid-cols-3">
+      {mcps.map((entry) => <EntryCard entry={entry} type="mcps" />)}
+    </div>
+    <div
+      id="empty-state"
+      hidden
+      class="mt-xl rounded-lg border border-dashed border-hairline-strong px-lg py-3xl text-center"
+    >
+      <p class="text-body-md-strong text-ink">No results match your filters</p>
+      <p class="mt-xxs text-body-sm text-body">Try clearing a filter or searching a different term.</p>
+    </div>
+  </Section>
+</Layout>

@@ -1,0 +1,60 @@
+---
+import Button from "./Button.astro";
+
+interface Props {
+  eyebrow?: string;
+  title: string;
+  subtitle: string;
+  primaryCta: { label: string; href: string };
+  secondaryCta?: { label: string; href: string };
+}
+
+const { eyebrow, title, subtitle, primaryCta, secondaryCta } = Astro.props;
+---
+
+<section class="relative overflow-hidden bg-canvas">
+  <div class="mesh-gradient" aria-hidden="true"></div>
+
+  <div class="container-page relative flex flex-col items-start gap-lg py-4xl sm:py-section">
+    {eyebrow && (
+      <span class="inline-flex items-center rounded-full bg-canvas-soft px-sm py-xxs font-mono text-caption-mono text-body">
+        {eyebrow}
+      </span>
+    )}
+    <h1 class="max-w-[48rem] text-display-xl text-ink sm:text-[64px] sm:leading-[64px] sm:tracking-[-3.2px]">
+      {title}
+    </h1>
+    <p class="max-w-[36rem] text-body-lg text-body">{subtitle}</p>
+    <div class="flex flex-wrap items-center gap-md">
+      <Button href={primaryCta.href} variant="primary">{primaryCta.label}</Button>
+      {secondaryCta && (
+        <Button href={secondaryCta.href} variant="secondary">{secondaryCta.label}</Button>
+      )}
+    </div>
+  </div>
+</section>
+
+<style>
+  .mesh-gradient {
+    position: absolute;
+    inset: -20% -10% auto -10%;
+    height: 140%;
+    max-height: 900px;
+    background-image:
+      radial-gradient(38% 45% at 12% 15%, var(--color-gradient-develop-start) 0%, transparent 70%),
+      radial-gradient(32% 40% at 32% 5%, var(--color-gradient-develop-end) 0%, transparent 72%),
+      radial-gradient(38% 45% at 68% 10%, var(--color-gradient-preview-start) 0%, transparent 70%),
+      radial-gradient(34% 42% at 85% 22%, var(--color-gradient-preview-end) 0%, transparent 72%),
+      radial-gradient(30% 38% at 55% 0%, var(--color-gradient-ship-start) 0%, transparent 72%),
+      radial-gradient(28% 36% at 95% 5%, var(--color-gradient-ship-end) 0%, transparent 72%);
+    opacity: 0.22;
+    filter: blur(60px) saturate(130%);
+    pointer-events: none;
+  }
+
+  @media (min-width: 640px) {
+    .mesh-gradient {
+      opacity: 0.28;
+    }
+  }
+</style>

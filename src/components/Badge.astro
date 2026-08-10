@@ -1,0 +1,22 @@
+---
+interface Props {
+  variant?: "default" | "link" | "warning" | "error" | "violet";
+  class?: string;
+}
+
+const { variant = "default", class: className = "" } = Astro.props;
+
+const variants: Record<string, string> = {
+  default: "bg-canvas-soft text-body",
+  link: "bg-link-bg-soft text-link-deep",
+  warning: "bg-warning-soft text-warning-deep",
+  error: "bg-error-soft text-error-deep",
+  violet: "bg-violet-soft text-violet-deep",
+};
+---
+
+<span
+  class={`inline-flex items-center gap-1 rounded-full px-xs h-5 text-caption whitespace-nowrap ${variants[variant]} ${className}`}
+>
+  <slot />
+</span>

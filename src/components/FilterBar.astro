@@ -1,0 +1,184 @@
+---
+import { CATEGORIES } from "../data/categories";
+import { CLIENTS } from "../data/clients";
+import { RUNTIMES } from "../data/runtimes";
+
+interface Props {
+  type: "skills" | "mcps";
+  presetCategory?: string;
+}
+
+const { type, presetCategory } = Astro.props;
+const noun = type === "skills" ? "skills" : "MCP servers";
+---
+
+<div class="flex flex-col gap-md" data-filter-bar data-preset-category={presetCategory}>
+  <div class="flex flex-col gap-sm sm:flex-row sm:items-center">
+    <label class="sr-only" for="filter-search">Search {noun}</label>
+    <div class="relative flex-1">
+      <input
+        id="filter-search"
+        type="search"
+        name="q"
+        placeholder="Search by name or description…"
+        autocomplete="off"
+        spellcheck="false"
+        class="h-10 w-full rounded-sm border border-hairline bg-canvas pl-sm pr-sm text-body-sm text-ink placeholder:text-mute focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link"
+        data-filter="q"
+      />
+    </div>
+
+    <div class="flex gap-sm">
+      <select
+        id="filter-pricing"
+        name="pricing"
+        class="h-10 rounded-sm border border-hairline bg-canvas px-sm text-body-sm text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link"
+        data-filter="pricing"
+        aria-label="Filter by pricing"
+      >
+        <option value="all">All pricing</option>
+        <option value="free">Free</option>
+        <option value="freemium">Freemium</option>
+        <option value="paid">Paid</option>
+      </select>
+
+      <select
+        id="filter-client"
+        name="client"
+        class="h-10 rounded-sm border border-hairline bg-canvas px-sm text-body-sm text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link"
+        data-filter="client"
+        aria-label="Filter by client compatibility"
+      >
+        <option value="all">All clients</option>
+        {CLIENTS.map((c) => <option value={c.slug}>{c.label}</option>)}
+      </select>
+
+      {type === "mcps" && (
+        <select
+          id="filter-runtime"
+          name="runtime"
+          class="h-10 rounded-sm border border-hairline bg-canvas px-sm text-body-sm text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link"
+          data-filter="runtime"
+          aria-label="Filter by runtime"
+        >
+          <option value="all">All runtimes</option>
+          {RUNTIMES.map((r) => <option value={r.slug}>{r.label}</option>)}
+        </select>
+      )}
+    </div>
+  </div>
+
+  <div class="flex flex-wrap gap-xs" role="group" aria-label="Filter by category">
+    <button
+      type="button"
+      data-category-filter="all"
+      class="filter-pill inline-flex h-8 items-center rounded-pill-sm border border-hairline px-md text-body-sm transition-colors duration-150"
+      aria-pressed="true"
+    >
+      All Categories
+    </button>
+    {CATEGORIES.map((c) => (
+      <button
+        type="button"
+        data-category-filter={c.slug}
+        class="filter-pill inline-flex h-8 items-center rounded-pill-sm border border-hairline px-md text-body-sm transition-colors duration-150"
+        aria-pressed="false"
+      >
+        {c.label}
+      </button>
+    ))}
+  </div>
+
+  <p id="results-count" class="text-body-sm text-mute" aria-live="polite"></p>
+</div>
+
+<style>
+  .filter-pill[aria-pressed="true"] {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    border-color: var(--color-primary);
+  }
+  .filter-pill[aria-pressed="false"]:hover {
+    background-color: var(--color-canvas-soft);
+  }
+</style>
+
+<script>
+  function initFilterBar(bar: HTMLElement) {
+    const search = bar.querySelector<HTMLInputElement>('[data-filter="q"]');
+    const pricing = bar.querySelector<HTMLSelectElement>('[data-filter="pricing"]');
+    const client = bar.querySelector<HTMLSelectElement>('[data-filter="client"]');
+    const runtime = bar.querySelector<HTMLSelectElement>('[data-filter="runtime"]');
+    const pills = Array.from(bar.querySelectorAll<HTMLButtonElement>("[data-category-filter]"));
+    const countEl = document.getElementById("results-count");
+    const emptyState = document.getElementById("empty-state");
+    const cards = Array.from(document.querySelectorAll<HTMLElement>("[data-entry]"));
+
+    let activeCategory = bar.dataset.presetCategory || "all";
+
+    function syncUrl() {
+      const params = new URLSearchParams();
+      if (search?.value) params.set("q", search.value);
+      if (activeCategory !== "all") params.set("category", activeCategory);
+      if (pricing?.value && pricing.value !== "all") params.set("pricing", pricing.value);
+      if (client?.value && client.value !== "all") params.set("client", client.value);
+      if (runtime?.value && runtime.value !== "all") params.set("runtime", runtime.value);
+      const qs = params.toString();
+      const url = qs ? `${location.pathname}?${qs}` : location.pathname;
+      history.replaceState(null, "", url);
+    }
+
+    function apply() {
+      const q = (search?.value ?? "").trim().toLowerCase();
+      let visible = 0;
+
+      for (const card of cards) {
+        const matchesQuery =
+          !q || card.dataset.name?.includes(q) || card.dataset.tagline?.includes(q);
+        const matchesCategory =
+          activeCategory === "all" || card.dataset.categories?.split(",").includes(activeCategory);
+        const matchesPricing =
+          !pricing || pricing.value === "all" || card.dataset.pricing === pricing.value;
+        const matchesClient =
+          !client || client.value === "all" || card.dataset.clients?.split(",").includes(client.value);
+        const matchesRuntime =
+          !runtime || runtime.value === "all" || card.dataset.runtime?.split(",").includes(runtime.value);
+
+        const isVisible =
+          matchesQuery && matchesCategory && matchesPricing && matchesClient && matchesRuntime;
+        card.hidden = !isVisible;
+        if (isVisible) visible += 1;
+      }
+
+      if (countEl) countEl.textContent = `Showing ${visible} of ${cards.length}`;
+      if (emptyState) emptyState.hidden = visible !== 0;
+      syncUrl();
+    }
+
+    function setActiveCategory(slug: string) {
+      activeCategory = slug;
+      for (const pill of pills) {
+        pill.setAttribute("aria-pressed", String(pill.dataset.categoryFilter === slug));
+      }
+      apply();
+    }
+
+    search?.addEventListener("input", apply);
+    pricing?.addEventListener("change", apply);
+    client?.addEventListener("change", apply);
+    runtime?.addEventListener("change", apply);
+    for (const pill of pills) {
+      pill.addEventListener("click", () => setActiveCategory(pill.dataset.categoryFilter ?? "all"));
+    }
+
+    // Initialize from URL query params (progressive enhancement).
+    const initial = new URLSearchParams(location.search);
+    if (initial.has("q") && search) search.value = initial.get("q") ?? "";
+    if (initial.has("pricing") && pricing) pricing.value = initial.get("pricing") ?? "all";
+    if (initial.has("client") && client) client.value = initial.get("client") ?? "all";
+    if (initial.has("runtime") && runtime) runtime.value = initial.get("runtime") ?? "all";
+    setActiveCategory(initial.get("category") ?? activeCategory);
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-filter-bar]").forEach(initFilterBar);
+</script>

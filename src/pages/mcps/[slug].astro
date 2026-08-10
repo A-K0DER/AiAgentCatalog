@@ -1,0 +1,109 @@
+---
+import { getCollection, render } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import Section from "../../components/Section.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import VerificationBadge from "../../components/VerificationBadge.astro";
+import Badge from "../../components/Badge.astro";
+import MetaTable from "../../components/MetaTable.astro";
+import EntryCard from "../../components/EntryCard.astro";
+import CodeBlock from "../../components/CodeBlock.astro";
+import Icon from "../../components/Icon.astro";
+import { getCategory } from "../../data/categories";
+
+export async function getStaticPaths() {
+  const mcps = await getCollection("mcps");
+  return mcps.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const { name, tagline, categories, verification, pricing, sourceUrl, installCommand } = entry.data;
+
+const allMcps = await getCollection("mcps");
+const related = allMcps
+  .filter((m) => m.id !== entry.id && m.data.categories.some((c) => categories.includes(c)))
+  .slice(0, 3);
+
+const pricingLabel = { free: "Free", freemium: "Freemium", paid: "Paid" }[pricing];
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name,
+  description: tagline,
+  applicationCategory: "DeveloperApplication",
+  offers: { "@type": "Offer", price: pricing === "free" ? "0" : undefined, priceCurrency: "USD" },
+  codeRepository: sourceUrl,
+  author: entry.data.author ? { "@type": "Organization", name: entry.data.author } : undefined,
+};
+---
+
+<Layout
+  title={name}
+  description={tagline}
+  jsonLd={jsonLd}
+>
+  <Section>
+    <Breadcrumbs
+      items={[{ label: "MCPs", href: "/mcps/" }, { label: name }]}
+      class="mb-lg"
+    />
+
+    <div class="flex flex-col gap-lg lg:flex-row lg:items-start lg:justify-between">
+      <div class="flex flex-col gap-sm">
+        <div class="flex flex-wrap items-center gap-xs">
+          <VerificationBadge status={verification} />
+          <Badge variant={pricing === "free" ? "default" : "violet"}>{pricingLabel}</Badge>
+          {categories.map((slug) => {
+            const cat = getCategory(slug);
+            return cat ? (
+              <a href={`/mcps/category/${cat.slug}/`}>
+                <Badge>{cat.label}</Badge>
+              </a>
+            ) : null;
+          })}
+        </div>
+        <h1 class="text-display-xl text-ink">{name}</h1>
+        <p class="max-w-[42rem] text-body-lg text-body">{tagline}</p>
+      </div>
+
+      <a
+        href={sourceUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex h-12 shrink-0 items-center gap-2 rounded-pill bg-primary px-sm text-button-lg text-on-primary hover:bg-ink/90"
+      >
+        View Source <Icon name="external-link" size={16} />
+      </a>
+    </div>
+
+    {installCommand && (
+      <div class="mt-2xl">
+        <CodeBlock code={installCommand} label="Install" />
+      </div>
+    )}
+
+    <div class="mt-2xl grid grid-cols-1 gap-2xl lg:grid-cols-[1fr_360px]">
+      <div class="prose-content max-w-none text-body-md text-body [&_h2]:mt-xl [&_h2]:mb-sm [&_h2]:text-display-sm [&_h2]:text-ink [&_p]:mb-md [&_ul]:mb-md [&_ul]:list-disc [&_ul]:pl-lg [&_code]:font-mono [&_code]:text-code [&_code]:text-ink">
+        <Content />
+      </div>
+
+      <aside>
+        <h2 class="mb-sm text-body-sm-strong text-ink">Details</h2>
+        <MetaTable entry={entry} />
+      </aside>
+    </div>
+  </Section>
+
+  {related.length > 0 && (
+    <Section eyebrow="Related" title="Similar MCP Servers" soft>
+      <div class="grid grid-cols-1 gap-lg sm:grid-cols-2 lg:grid-cols-3">
+        {related.map((r) => <EntryCard entry={r} type="mcps" />)}
+      </div>
+    </Section>
+  )}
+</Layout>

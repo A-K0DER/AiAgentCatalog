@@ -1,0 +1,55 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import Section from "../../components/Section.astro";
+import Icon from "../../components/Icon.astro";
+import { CATEGORIES } from "../../data/categories";
+
+const skills = await getCollection("skills");
+const mcps = await getCollection("mcps");
+
+const rows = CATEGORIES.map((cat) => ({
+  ...cat,
+  skillCount: skills.filter((s) => s.data.categories.includes(cat.slug)).length,
+  mcpCount: mcps.filter((m) => m.data.categories.includes(cat.slug)).length,
+}));
+---
+
+<Layout
+  title="All Categories"
+  description="Every use-case category in the catalog — Web Scraping, Database Administration, DevOps & CI/CD, Browser Automation, and more — with Skills and MCPs listed separately for each."
+>
+  <Section
+    eyebrow="Taxonomy"
+    title="All Categories"
+    description="Skills and MCPs are tagged by operational objective, not by vendor. Pick a category to see what's available for that job."
+  >
+    <div class="grid grid-cols-1 gap-lg sm:grid-cols-2">
+      {rows.map((cat) => (
+        <div class="flex flex-col gap-md rounded-lg border border-hairline bg-canvas p-xl">
+          <div class="flex items-start justify-between gap-sm">
+            <div class="flex items-center gap-sm">
+              <Icon name={cat.icon} size={24} class="text-ink" />
+              <h2 class="text-display-sm text-ink">{cat.label}</h2>
+            </div>
+          </div>
+          <p class="text-body-sm text-body">{cat.description}</p>
+          <div class="mt-auto flex flex-wrap gap-sm pt-sm">
+            <a
+              href={`/skills/category/${cat.slug}/`}
+              class="inline-flex h-9 items-center gap-1 rounded-pill-sm border border-hairline px-md text-body-sm text-ink hover:bg-canvas-soft"
+            >
+              {cat.skillCount} Skills
+            </a>
+            <a
+              href={`/mcps/category/${cat.slug}/`}
+              class="inline-flex h-9 items-center gap-1 rounded-pill-sm border border-hairline px-md text-body-sm text-ink hover:bg-canvas-soft"
+            >
+              {cat.mcpCount} MCPs
+            </a>
+          </div>
+        </div>
+      ))}
+    </div>
+  </Section>
+</Layout>

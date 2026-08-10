@@ -1,0 +1,90 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import Section from "../../components/Section.astro";
+import VerificationBadge from "../../components/VerificationBadge.astro";
+
+const skills = await getCollection("skills");
+const mcps = await getCollection("mcps");
+const total = skills.length + mcps.length;
+const verifiedCount = [...skills, ...mcps].filter((e) => e.data.verification === "verified").length;
+
+const statuses = [
+  {
+    status: "verified" as const,
+    detail:
+      "Maintained by the original author or org, in an actively maintained repository. Most official reference servers and first-party skills fall here.",
+  },
+  {
+    status: "community" as const,
+    detail:
+      "Functional and useful, but no longer under active development by its original maintainer — for example, a reference server that's been moved to an archive repository.",
+  },
+  {
+    status: "unverified" as const,
+    detail:
+      "Submitted but not yet independently checked against its source. Treat with the same caution you'd apply to any unaudited dependency.",
+  },
+];
+---
+
+<Layout
+  title="About"
+  description="Why SkillForAgents exists, how listings are verified, and what makes this catalog different from a generic agent-tooling directory."
+>
+  <Section
+    eyebrow="About"
+    title="A catalog built around the questions you actually ask before installing something."
+    description="Before you wire a skill or MCP server into an agent, you need to know what it requires, how it runs, and whether anyone still maintains it. Most directories don't say. This one does."
+  >
+    <div class="grid grid-cols-1 gap-2xl lg:grid-cols-2">
+      <div class="flex flex-col gap-md">
+        <h2 class="text-display-sm text-ink">Why this exists</h2>
+        <p class="text-body-md text-body">
+          Agent tooling directories tend to stop at a name, a logo, and a link. That's fine for
+          browsing, but it's not enough to actually decide whether to install something — you
+          still have to open the repository yourself to find out what environment variables it
+          needs, what runtime it expects, or whether it's been touched in the last year.
+        </p>
+        <p class="text-body-md text-body">
+          SkillForAgents catalogs Claude Agent Skills and MCP servers side by side, organized by
+          the use case they solve rather than by vendor, with that technical detail surfaced on
+          every listing instead of buried in a README.
+        </p>
+      </div>
+      <div class="flex flex-col gap-md">
+        <h2 class="text-display-sm text-ink">By the numbers</h2>
+        <div class="grid grid-cols-2 gap-md">
+          <div class="rounded-md border border-hairline bg-canvas p-lg">
+            <span class="block text-display-lg text-ink">{total}</span>
+            <span class="text-body-sm text-body">Total listings</span>
+          </div>
+          <div class="rounded-md border border-hairline bg-canvas p-lg">
+            <span class="block text-display-lg text-ink">{verifiedCount}</span>
+            <span class="text-body-sm text-body">Verified listings</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Section>
+
+  <Section eyebrow="Verification" title="What each status badge means" soft>
+    <div class="flex flex-col gap-md">
+      {statuses.map((s) => (
+        <div class="flex flex-col gap-xs rounded-md border border-hairline bg-canvas p-lg sm:flex-row sm:items-start sm:gap-lg">
+          <VerificationBadge status={s.status} class="shrink-0" />
+          <p class="text-body-sm text-body">{s.detail}</p>
+        </div>
+      ))}
+    </div>
+  </Section>
+
+  <Section eyebrow="Independence" title="Not affiliated with Anthropic or GitHub">
+    <p class="max-w-[42rem] text-body-md text-body">
+      SkillForAgents is an independent, community-curated catalog. Listings for Anthropic's
+      official Agent Skills and reference MCP servers, GitHub's MCP server, and other
+      first-party tools are included because they're useful and public — not because we're
+      operated by, endorsed by, or affiliated with those organizations.
+    </p>
+  </Section>
+</Layout>

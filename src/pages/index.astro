@@ -1,11 +1,164 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
+import { getCollection } from "astro:content";
+import Layout from "../layouts/Layout.astro";
+import Hero from "../components/Hero.astro";
+import Section from "../components/Section.astro";
+import EntryCard from "../components/EntryCard.astro";
+import Button from "../components/Button.astro";
+import Icon from "../components/Icon.astro";
+import { CATEGORIES } from "../data/categories";
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const skills = await getCollection("skills");
+const mcps = await getCollection("mcps");
+
+const featuredSkills = skills.filter((s) => s.data.featured).slice(0, 3);
+const featuredMcps = mcps.filter((m) => m.data.featured).slice(0, 3);
+
+function categoryCount(slug: string) {
+  return (
+    skills.filter((s) => s.data.categories.includes(slug)).length +
+    mcps.filter((m) => m.data.categories.includes(slug)).length
+  );
+}
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "SkillForAgents",
+  url: Astro.site,
+  description:
+    "The open, verified catalog of Claude Agent Skills and MCP servers, browsable by use case.",
+};
+
+const comparisonRows = [
+  { feature: "Per-listing required environment variables", us: true, them: false },
+  { feature: "Runtime environment (npx / docker / uv / Python)", us: true, them: false },
+  { feature: "Client compatibility tags", us: true, them: false },
+  { feature: "Maintenance / verification status", us: true, them: false },
+  { feature: "Dedicated MCP server catalog", us: true, them: false },
+  { feature: "Category + client + runtime filtering", us: true, them: "Limited" },
+];
 ---
 
-<Layout>
-	<Welcome />
+<Layout
+  title="SkillForAgents — The Open Catalog for Claude Skills & MCPs"
+  description="Browse verified Claude Agent Skills and MCP servers by use case. Every listing includes required environment variables, runtime, and client compatibility — the technical detail generic directories skip."
+  jsonLd={jsonLd}
+>
+  <Hero
+    eyebrow="The open catalog for agent tooling"
+    title="Find the right skill or MCP before you wire it in."
+    subtitle="A curated, verified catalog of Claude Agent Skills and MCP servers — organized by use case, with the environment variables, runtime, and client compatibility every listing actually needs."
+    primaryCta={{ label: "Browse Skills", href: "/skills/" }}
+    secondaryCta={{ label: "Browse MCPs", href: "/mcps/" }}
+  />
+
+  <div class="border-y border-hairline bg-canvas">
+    <div class="container-page grid grid-cols-3 divide-x divide-hairline py-lg">
+      <div class="flex flex-col items-center gap-xxs px-sm text-center">
+        <span class="text-display-lg text-ink">{skills.length}</span>
+        <span class="text-body-sm text-body">Agent Skills</span>
+      </div>
+      <div class="flex flex-col items-center gap-xxs px-sm text-center">
+        <span class="text-display-lg text-ink">{mcps.length}</span>
+        <span class="text-body-sm text-body">MCP Servers</span>
+      </div>
+      <div class="flex flex-col items-center gap-xxs px-sm text-center">
+        <span class="text-display-lg text-ink">{CATEGORIES.length}</span>
+        <span class="text-body-sm text-body">Use-Case Categories</span>
+      </div>
+    </div>
+  </div>
+
+  <Section
+    eyebrow="Taxonomy"
+    title="Browse by use case, not by vendor."
+    description="Every listing is tagged against a fixed set of operational objectives — pick the job you're automating, not the brand name."
+  >
+    <div class="grid grid-cols-1 gap-md sm:grid-cols-2 lg:grid-cols-5">
+      {CATEGORIES.map((cat) => (
+        <a
+          href={`/skills/category/${cat.slug}/`}
+          class="flex flex-col gap-sm rounded-md border border-hairline bg-canvas p-lg transition-shadow duration-150 hover:shadow-3"
+        >
+          <Icon name={cat.icon} size={22} class="text-ink" />
+          <span class="text-body-md-strong text-ink">{cat.label}</span>
+          <span class="text-caption text-mute">{categoryCount(cat.slug)} listings</span>
+        </a>
+      ))}
+    </div>
+  </Section>
+
+  <Section eyebrow="Featured" title="Skills worth knowing about" soft>
+    <div class="grid grid-cols-1 gap-lg sm:grid-cols-2 lg:grid-cols-3">
+      {featuredSkills.map((entry) => <EntryCard entry={entry} type="skills" />)}
+    </div>
+    <div class="mt-xl">
+      <Button href="/skills/" variant="secondary">
+        View all Skills <Icon name="arrow-right" size={16} />
+      </Button>
+    </div>
+  </Section>
+
+  <Section eyebrow="Featured" title="MCP servers worth knowing about">
+    <div class="grid grid-cols-1 gap-lg sm:grid-cols-2 lg:grid-cols-3">
+      {featuredMcps.map((entry) => <EntryCard entry={entry} type="mcps" />)}
+    </div>
+    <div class="mt-xl">
+      <Button href="/mcps/" variant="secondary">
+        View all MCPs <Icon name="arrow-right" size={16} />
+      </Button>
+    </div>
+  </Section>
+
+  <Section
+    eyebrow="Why this catalog"
+    title="Most directories stop at a name and a link."
+    description="We built this after finding the same gap across existing agent-tooling directories: no technical metadata, no verification status, and no MCP coverage at all. Here's what every listing on SkillForAgents includes by default."
+    soft
+  >
+    <div class="overflow-x-auto rounded-lg border border-hairline bg-canvas">
+      <table class="w-full min-w-[560px] text-left">
+        <thead>
+          <tr class="border-b border-hairline text-caption-mono uppercase text-mute">
+            <th class="px-lg py-sm font-mono font-normal">Feature</th>
+            <th class="px-lg py-sm font-mono font-normal">SkillForAgents</th>
+            <th class="px-lg py-sm font-mono font-normal">Typical directory</th>
+          </tr>
+        </thead>
+        <tbody>
+          {comparisonRows.map((row) => (
+            <tr class="border-b border-hairline last:border-0">
+              <td class="px-lg py-sm text-body-sm text-ink">{row.feature}</td>
+              <td class="px-lg py-sm">
+                {row.us === true ? (
+                  <Icon name="check" size={18} class="text-link" />
+                ) : (
+                  <span class="text-body-sm text-body">{row.us}</span>
+                )}
+              </td>
+              <td class="px-lg py-sm">
+                {row.them === false ? (
+                  <Icon name="x" size={18} class="text-mute" />
+                ) : (
+                  <span class="text-body-sm text-body">{row.them}</span>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </Section>
+
+  <section class="bg-primary py-4xl sm:py-5xl">
+    <div class="container-page flex flex-col items-start gap-md">
+      <h2 class="text-display-lg text-on-primary">Built something worth listing?</h2>
+      <p class="max-w-[36rem] text-body-lg text-on-primary/70">
+        Submissions go through a public GitHub issue template — no account, no gatekeeping,
+        just a structured form so every listing ships with the metadata this catalog needs.
+      </p>
+      <Button href="/submit/" variant="secondary">Submit a Listing</Button>
+    </div>
+  </section>
 </Layout>

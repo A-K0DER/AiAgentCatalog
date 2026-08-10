@@ -1,0 +1,61 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Section from "../../components/Section.astro";
+import Button from "../../components/Button.astro";
+import Icon from "../../components/Icon.astro";
+
+const issueUrl =
+  "https://github.com/A-K0DER/AgentCatalog/issues/new?template=submit-listing.yml&labels=submission";
+
+const requirements = [
+  { label: "Name & tagline", detail: "What it's called, and a one-sentence summary of what it does." },
+  { label: "Categories", detail: "Which use-case categories it belongs to — pick from the existing taxonomy." },
+  { label: "Runtime", detail: "For MCPs: how it runs — npx, Docker, uv/Python, a compiled binary, etc." },
+  { label: "Required environment variables", detail: "Every API key or config value needed, and whether it's optional." },
+  { label: "Client compatibility", detail: "Which clients it's confirmed to work with — Claude Desktop, Cursor, Claude Code CLI, Windsurf, VS Code." },
+  { label: "Source link", detail: "A public GitHub repository we can verify the listing against." },
+];
+---
+
+<Layout
+  title="Submit a Listing"
+  description="Submit a Claude Agent Skill or MCP server to the catalog through a structured GitHub issue — no account required, no gatekeeping."
+>
+  <Section
+    eyebrow="Contribute"
+    title="Submit a Listing"
+    description="Submissions go through a public GitHub issue, not a form that disappears into an inbox. Fill in the structured template and we'll review it against the same metadata every other listing has."
+  >
+    <div class="grid grid-cols-1 gap-2xl lg:grid-cols-[1fr_360px]">
+      <div class="flex flex-col gap-md">
+        <h2 class="text-display-sm text-ink">What we need</h2>
+        <ul class="flex flex-col gap-md">
+          {requirements.map((req) => (
+            <li class="flex gap-sm rounded-md border border-hairline bg-canvas p-lg">
+              <Icon name="check" size={18} class="mt-1 shrink-0 text-link" />
+              <div>
+                <p class="text-body-md-strong text-ink">{req.label}</p>
+                <p class="text-body-sm text-body">{req.detail}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <aside class="flex flex-col gap-md rounded-lg border border-hairline bg-canvas-soft p-xl">
+        <h2 class="text-body-sm-strong text-ink">Ready to submit?</h2>
+        <p class="text-body-sm text-body">
+          Opens a pre-labeled GitHub issue using our submission template. You'll need a free
+          GitHub account to post it.
+        </p>
+        <Button href={issueUrl} variant="primary">
+          Open Submission Issue <Icon name="external-link" size={16} />
+        </Button>
+        <p class="text-caption text-mute">
+          We verify every submission's source link and metadata before it's added to the
+          catalog, and mark maintenance status honestly — active, community, or unverified.
+        </p>
+      </aside>
+    </div>
+  </Section>
+</Layout>

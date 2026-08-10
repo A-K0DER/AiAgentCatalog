@@ -1,0 +1,45 @@
+---
+interface Props {
+  code: string;
+  label?: string;
+  class?: string;
+}
+
+const { code, label, class: className = "" } = Astro.props;
+---
+
+<div class={`overflow-hidden rounded-md bg-primary text-on-primary ${className}`}>
+  {label && (
+    <div class="flex items-center justify-between border-b border-on-primary/10 px-lg py-xs">
+      <span class="font-mono text-caption-mono text-on-primary/50">{label}</span>
+      <button
+        type="button"
+        class="copy-btn inline-flex items-center gap-1 rounded-sm px-xs py-xxs text-caption-mono text-on-primary/60 hover:text-on-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-on-primary"
+        data-code={code}
+        aria-label="Copy command to clipboard"
+        aria-live="polite"
+      >
+        Copy
+      </button>
+    </div>
+  )}
+  <pre class="overflow-x-auto px-lg py-md"><code class="font-mono text-code">{code}</code></pre>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>(".copy-btn").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const code = btn.dataset.code ?? "";
+      try {
+        await navigator.clipboard.writeText(code);
+        const original = btn.textContent;
+        btn.textContent = "Copied";
+        setTimeout(() => {
+          btn.textContent = original;
+        }, 1500);
+      } catch {
+        /* clipboard unavailable — no-op */
+      }
+    });
+  });
+</script>
