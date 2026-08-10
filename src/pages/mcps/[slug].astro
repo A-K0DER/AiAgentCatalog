@@ -30,6 +30,17 @@ const related = allMcps
 
 const pricingLabel = { free: "Free", freemium: "Freemium", paid: "Paid" }[pricing];
 
+const categoryLabels = categories.map((slug) => getCategory(slug)?.label).filter(Boolean) as string[];
+const seoDescription = `${tagline} An MCP server in the Model Context Protocol server directory${categoryLabels.length ? ` for ${categoryLabels.join(", ").toLowerCase()}` : ""}.`;
+const seoKeywords = [
+  name,
+  "MCP server",
+  "Model Context Protocol server",
+  "mcp server directory",
+  "cursor mcp servers",
+  ...categoryLabels.map((label) => `AI agent skills for ${label.toLowerCase()}`),
+];
+
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
@@ -43,8 +54,9 @@ const jsonLd = {
 ---
 
 <Layout
-  title={name}
-  description={tagline}
+  title={`${name} — MCP Server`}
+  description={seoDescription}
+  keywords={seoKeywords}
   jsonLd={jsonLd}
 >
   <Section>

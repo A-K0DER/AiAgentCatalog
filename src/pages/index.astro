@@ -21,14 +21,51 @@ function categoryCount(slug: string) {
   );
 }
 
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  name: "SkillForAgents",
-  url: Astro.site,
-  description:
-    "The open, verified catalog of Claude Agent Skills and MCP servers, browsable by use case.",
-};
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "SkillForAgents",
+    url: Astro.site,
+    description:
+      "The open, verified catalog of Claude Agent Skills and MCP servers, browsable by use case.",
+    potentialAction: {
+      "@type": "SearchAction",
+      target: `${Astro.site}skills/?q={search_term_string}`,
+      "query-input": "required name=search_term_string",
+    },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: [
+      {
+        "@type": "Question",
+        name: "What are AI agent skills?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "AI agent skills are packaged instructions, scripts, and resources that an AI agent like Claude loads on demand to perform a specific task well — for example editing a spreadsheet, generating a PDF, or reviewing code. They extend what an agent can do beyond its base model.",
+        },
+      },
+      {
+        "@type": "Question",
+        name: "What is an MCP server?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "An MCP (Model Context Protocol) server is a standard interface that connects an AI agent to a real system — a database, a browser, a search API, or a file system — so the agent can take real actions instead of only generating text.",
+        },
+      },
+      {
+        "@type": "Question",
+        name: "Is SkillForAgents free to use?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "Yes. Browsing the AI agent skills directory and MCP server directory is free, and every listing links to its original source so you can install it directly.",
+        },
+      },
+    ],
+  },
+];
 
 const comparisonRows = [
   { feature: "Per-listing required environment variables", us: true, them: false },
@@ -41,8 +78,23 @@ const comparisonRows = [
 ---
 
 <Layout
-  title="SkillForAgents — The Open Catalog for Claude Skills & MCPs"
-  description="Browse verified Claude Agent Skills and MCP servers by use case. Every listing includes required environment variables, runtime, and client compatibility — the technical detail generic directories skip."
+  title="AI Agent Skills & MCP Server Directory"
+  description="The AI agent skills directory for Claude agent skills and MCP servers. Browse a verified catalog of agentic workflow integrations by use case, with the environment variables, runtime, and client compatibility every listing needs."
+  keywords={[
+    "AI agent skills",
+    "AI agent skills directory",
+    "AI agent skills library",
+    "AI agent skills marketplace",
+    "AI agent skills catalog",
+    "mcp server directory",
+    "model context protocol skills",
+    "claude agent skills",
+    "cursor mcp servers",
+    "ai agent tools registry",
+    "agentic workflow integrations",
+    "claude code tools",
+    "custom agent skills exporter",
+  ]}
   jsonLd={jsonLd}
 >
   <Hero
@@ -148,6 +200,59 @@ const comparisonRows = [
           ))}
         </tbody>
       </table>
+    </div>
+  </Section>
+
+  <Section
+    eyebrow="About the directory"
+    title="What is SkillForAgents?"
+    soft
+  >
+    <div class="prose-content max-w-[68rem] text-body-md text-body [&_h3]:mb-sm [&_h3]:mt-xl [&_h3]:text-display-sm [&_h3]:text-ink [&_p]:mb-md [&_ul]:mb-md [&_ul]:list-disc [&_ul]:pl-lg [&_li]:mb-xxs">
+      <p>SkillForAgents is an <strong>AI agent skills directory</strong> and MCP server directory built for one job: helping you find the right <strong>AI agent skills</strong> and Model Context Protocol integrations before you wire them into a real agent. Most general-purpose lists of "AI agent tools" stop at a name, a logo, and an outbound link. This one goes further — every entry in the <strong>agent skills library</strong> is tagged with its runtime, required environment variables, client compatibility, and verification status, so you can evaluate it without opening a repository first.</p>
+
+      <h3>An AI agent skills catalog organized by use case</h3>
+      <p>Rather than sorting by vendor, the <strong>AI agent skills database</strong> is organized by the operational objective a skill or MCP server solves. Whether you're looking for <strong>Claude agent skills</strong>, <strong>Claude Code skills</strong>, or <strong>Cursor MCP servers</strong>, you can browse by category — web scraping, database administration, DevOps and CI/CD, browser automation, search and research, full-stack coding, documents and files, communication, data and analytics, or productivity and memory — instead of scrolling an alphabetical list. That taxonomy makes this an effective <strong>AI agent skill finder</strong> for teams evaluating <strong>agentic workflow integrations</strong> at scale, not just a single tool.</p>
+
+      <h3>A dedicated MCP server directory</h3>
+      <p>Model Context Protocol has quickly become the standard way to connect an agent to a real system — a database, a browser, a search index, a filesystem. This <strong>MCP server directory</strong> tracks reference servers, community builds, and first-party integrations side by side with <strong>Claude agent skills</strong>, so you don't need a second site to compare a <strong>Model Context Protocol skill</strong> against a native Claude skill for the same job. Each MCP listing documents its install command, runtime (npx, Docker, uv/Python, or a compiled binary), and every required API key, which is the detail most <strong>AI agent tools registry</strong> sites leave out entirely.</p>
+
+      <h3>Built for people building AI agents</h3>
+      <p>If you're one of the growing number of engineers, indie builders, or platform teams assembling agentic systems, this catalog is meant to save you the research time. It works as an <strong>AI agent skill search</strong> tool when you know roughly what you need, and as a discovery surface — <strong>best AI agent skills</strong>, trending <strong>Claude Code tools</strong>, and newly added <strong>OpenAI agent skills</strong> and <strong>Cursor agent skills</strong> — when you're still exploring what's possible. Teams use it to find <strong>AI agent skills for developers</strong>, <strong>AI agent skills for DevOps</strong>, <strong>AI agent skills for data analysis</strong>, <strong>AI agent skills for web scraping</strong>, and <strong>AI agent skills for code review</strong>, alongside skills built for marketing, sales, customer support, research, automation, and SEO workflows.</p>
+
+      <h3>Verified, not just listed</h3>
+      <p>Every listing carries a verification badge — verified, community, or unverified — so you know whether a skill or MCP server is actively maintained before you depend on it. We don't run a <strong>custom agent skills exporter</strong> or generate listings automatically; every entry in this <strong>agent skills marketplace</strong> is checked against its source repository. If you're building or maintaining your own <strong>AI agent toolkit</strong> and want it discoverable in a directory that treats technical detail as a requirement rather than an afterthought, <a href="/submit/" class="text-link hover:underline">submit a listing</a> — it takes a structured GitHub issue, not an account.</p>
+
+      <h3>How to find the right skill fast</h3>
+      <p>Use the category filters if you already know the job — say, an MCP server for database administration or a Claude skill for spreadsheet generation. Use the search bar as an <strong>AI agent skill search</strong> shortcut when you know part of a name. And check back regularly: this is a living <strong>AI agent skills resource</strong>, not a static list, with new <strong>skills for AI agents</strong> and <strong>tools for building AI agents</strong> added as the ecosystem around Claude, Cursor, Codex, and other agent runtimes keeps expanding.</p>
+    </div>
+  </Section>
+
+  <Section eyebrow="FAQ" title="Common questions">
+    <div class="grid grid-cols-1 gap-lg lg:grid-cols-3">
+      <div class="flex flex-col gap-xs rounded-md border border-hairline bg-canvas p-lg">
+        <h3 class="text-body-md-strong text-ink">What are AI agent skills?</h3>
+        <p class="text-body-sm text-body">
+          Packaged instructions, scripts, and resources that an AI agent like Claude loads on
+          demand to perform a specific task well — editing a spreadsheet, generating a PDF, or
+          reviewing code. They extend what an agent can do beyond its base model.
+        </p>
+      </div>
+      <div class="flex flex-col gap-xs rounded-md border border-hairline bg-canvas p-lg">
+        <h3 class="text-body-md-strong text-ink">What is an MCP server?</h3>
+        <p class="text-body-sm text-body">
+          A Model Context Protocol server is a standard interface connecting an agent to a real
+          system — a database, a browser, a search API, or a filesystem — so it can take real
+          actions instead of only generating text.
+        </p>
+      </div>
+      <div class="flex flex-col gap-xs rounded-md border border-hairline bg-canvas p-lg">
+        <h3 class="text-body-md-strong text-ink">Is SkillForAgents free to use?</h3>
+        <p class="text-body-sm text-body">
+          Yes. Browsing the AI agent skills directory and MCP server directory is free, and
+          every listing links to its original source so you can install it directly.
+        </p>
+      </div>
     </div>
   </Section>
 

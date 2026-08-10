@@ -14,6 +14,16 @@ export async function getStaticPaths() {
 const { category } = Astro.params;
 const cat = getCategory(category)!;
 
+const keywordOverrides: Record<string, string> = {
+  "web-scraping": "AI agent skills for web scraping",
+  "devops-cicd": "AI agent skills for DevOps",
+  "search-research": "AI agent skills for research",
+  "full-stack-coding": "AI agent skills for developers",
+  "data-analytics": "AI agent skills for data analysis",
+  "communication": "AI agent skills for customer support",
+};
+const categoryKeyword = keywordOverrides[cat.slug] ?? `AI agent skills for ${cat.label.toLowerCase()}`;
+
 const allSkills = await getCollection("skills");
 const entries = allSkills
   .filter((s) => s.data.categories.includes(cat.slug))
@@ -30,8 +40,9 @@ const jsonLd = {
 ---
 
 <Layout
-  title={`${cat.label} Skills`}
-  description={`Claude Agent Skills for ${cat.label.toLowerCase()}. ${cat.description}`}
+  title={`${cat.label} Skills — AI Agent Skills Directory`}
+  description={`${categoryKeyword}: Claude Agent Skills for ${cat.label.toLowerCase()}. ${cat.description}`}
+  keywords={[categoryKeyword, `${cat.label} skills`, "Claude agent skills", "AI agent skills directory"]}
   jsonLd={jsonLd}
 >
   <Section>

@@ -29,6 +29,16 @@ const related = allSkills
 
 const pricingLabel = { free: "Free", freemium: "Freemium", paid: "Paid" }[pricing];
 
+const categoryLabels = categories.map((slug) => getCategory(slug)?.label).filter(Boolean) as string[];
+const seoDescription = `${tagline} A Claude Agent Skill in the AI agent skills directory${categoryLabels.length ? ` for ${categoryLabels.join(", ").toLowerCase()}` : ""}.`;
+const seoKeywords = [
+  name,
+  "Claude agent skills",
+  "Claude Code skills",
+  "AI agent skills",
+  ...categoryLabels.map((label) => `AI agent skills for ${label.toLowerCase()}`),
+];
+
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
@@ -42,8 +52,9 @@ const jsonLd = {
 ---
 
 <Layout
-  title={name}
-  description={tagline}
+  title={`${name} — Claude Agent Skill`}
+  description={seoDescription}
+  keywords={seoKeywords}
   jsonLd={jsonLd}
 >
   <Section>

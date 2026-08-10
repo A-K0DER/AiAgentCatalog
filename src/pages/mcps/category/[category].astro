@@ -14,6 +14,16 @@ export async function getStaticPaths() {
 const { category } = Astro.params;
 const cat = getCategory(category)!;
 
+const keywordOverrides: Record<string, string> = {
+  "web-scraping": "AI agent skills for web scraping",
+  "devops-cicd": "AI agent skills for DevOps",
+  "search-research": "AI agent skills for research",
+  "full-stack-coding": "AI agent skills for developers",
+  "data-analytics": "AI agent skills for data analysis",
+  "communication": "AI agent skills for customer support",
+};
+const categoryKeyword = keywordOverrides[cat.slug] ?? `AI agent skills for ${cat.label.toLowerCase()}`;
+
 const allMcps = await getCollection("mcps");
 const entries = allMcps
   .filter((m) => m.data.categories.includes(cat.slug))
@@ -30,8 +40,9 @@ const jsonLd = {
 ---
 
 <Layout
-  title={`${cat.label} MCP Servers`}
-  description={`MCP servers for ${cat.label.toLowerCase()}. ${cat.description}`}
+  title={`${cat.label} MCP Servers — MCP Server Directory`}
+  description={`${categoryKeyword}: MCP servers for ${cat.label.toLowerCase()}. ${cat.description}`}
+  keywords={[categoryKeyword, `${cat.label} MCP servers`, "mcp server directory", "Model Context Protocol servers"]}
   jsonLd={jsonLd}
 >
   <Section>
