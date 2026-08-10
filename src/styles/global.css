@@ -328,3 +328,11 @@
     }
   }
 }
+
+/* Unlayered so it beats Tailwind's utilities layer (e.g. the `grid` display utility). */
+[data-view="grid"] #list-view {
+  display: none;
+}
+[data-view="list"] #grid-view {
+  display: none;
+}

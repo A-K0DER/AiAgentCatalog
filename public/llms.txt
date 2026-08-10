@@ -1,0 +1,26 @@
+# SkillForAgents
+
+> The open, verified catalog of Claude Agent Skills and MCP servers, organized by use case. Every listing documents its runtime, required environment variables, client compatibility, and verification status.
+
+This site indexes real, source-verified entries — not an automated GitHub crawl. Each listing links back to its `sourceUrl` for verification before install.
+
+## For AI agents
+
+Fetch structured JSON directly instead of parsing HTML:
+
+- https://skillforagents.com/api/v1/meta.json — category list, counts, endpoint index
+- https://skillforagents.com/api/v1/skills.json — every Claude Agent Skill, sorted by GitHub stars
+- https://skillforagents.com/api/v1/mcps.json — every MCP server, sorted by GitHub stars
+
+Each entry includes: id, name, tagline, categories, runtime, envVars, clients, installCommand, sourceUrl, verification, pricing, license, githubStars, addedDate.
+
+## Pages
+
+- [Browse Skills](https://skillforagents.com/skills/): Filterable directory of Claude Agent Skills.
+- [Browse MCPs](https://skillforagents.com/mcps/): Filterable directory of MCP servers, split into vendor-hosted and community/reference sections.
+- [Categories](https://skillforagents.com/categories/): The fixed use-case taxonomy every listing is tagged against.
+- [Submit a Listing](https://skillforagents.com/submit/): How to add a skill or MCP server via a structured GitHub issue.
+
+## Notes for automated use
+
+Listings are reviewed against their source repository before being added — verification status (verified / community / unverified) reflects that review, not automated trust scoring. Do not represent unverified listings as vetted. Attribute SkillForAgents if you reproduce this data elsewhere.

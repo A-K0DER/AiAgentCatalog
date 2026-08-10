@@ -24,6 +24,7 @@ pricing: freemium
 license: MIT
 author: "Anthropic / Model Context Protocol (archived reference server)"
 featured: false
+githubStars: 293
 addedDate: 2026-04-10
 ---
 

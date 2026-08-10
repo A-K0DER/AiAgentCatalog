@@ -28,6 +28,8 @@ pricing: free
 license: MIT
 author: GitHub
 featured: true
+officialHosted: true
+githubStars: 32122
 addedDate: 2026-07-02
 ---
 

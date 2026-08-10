@@ -30,6 +30,17 @@ const noun = type === "skills" ? "skills" : "MCP servers";
 
     <div class="flex gap-sm">
       <select
+        id="filter-sort"
+        name="sort"
+        class="h-10 rounded-sm border border-hairline bg-canvas px-sm text-body-sm text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link"
+        data-filter="sort"
+        aria-label="Sort order"
+      >
+        <option value="newest">Newest</option>
+        <option value="stars">Most Stars</option>
+      </select>
+
+      <select
         id="filter-pricing"
         name="pricing"
         class="h-10 rounded-sm border border-hairline bg-canvas px-sm text-body-sm text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link"
@@ -65,6 +76,25 @@ const noun = type === "skills" ? "skills" : "MCP servers";
           {RUNTIMES.map((r) => <option value={r.slug}>{r.label}</option>)}
         </select>
       )}
+
+      <div class="flex h-10 shrink-0 items-center rounded-sm border border-hairline p-0.5" role="group" aria-label="View mode">
+        <button
+          type="button"
+          data-view-toggle="grid"
+          class="view-toggle-btn inline-flex h-full items-center rounded-xs px-sm text-body-sm transition-colors duration-150"
+          aria-pressed="true"
+        >
+          Grid
+        </button>
+        <button
+          type="button"
+          data-view-toggle="list"
+          class="view-toggle-btn inline-flex h-full items-center rounded-xs px-sm text-body-sm transition-colors duration-150"
+          aria-pressed="false"
+        >
+          List
+        </button>
+      </div>
     </div>
   </div>
 
@@ -101,24 +131,77 @@ const noun = type === "skills" ? "skills" : "MCP servers";
   .filter-pill[aria-pressed="false"]:hover {
     background-color: var(--color-canvas-soft);
   }
+  .view-toggle-btn[aria-pressed="true"] {
+    background-color: var(--color-canvas-soft);
+    color: var(--color-ink);
+  }
+  .view-toggle-btn[aria-pressed="false"] {
+    color: var(--color-mute);
+  }
 </style>
 
 <script>
   function initFilterBar(bar: HTMLElement) {
     const search = bar.querySelector<HTMLInputElement>('[data-filter="q"]');
+    const sort = bar.querySelector<HTMLSelectElement>('[data-filter="sort"]');
     const pricing = bar.querySelector<HTMLSelectElement>('[data-filter="pricing"]');
     const client = bar.querySelector<HTMLSelectElement>('[data-filter="client"]');
     const runtime = bar.querySelector<HTMLSelectElement>('[data-filter="runtime"]');
     const pills = Array.from(bar.querySelectorAll<HTMLButtonElement>("[data-category-filter]"));
+    const viewToggles = Array.from(bar.querySelectorAll<HTMLButtonElement>("[data-view-toggle]"));
+    const resultsEl = document.getElementById("results");
     const countEl = document.getElementById("results-count");
     const emptyState = document.getElementById("empty-state");
     const cards = Array.from(document.querySelectorAll<HTMLElement>("[data-entry]"));
+    // Grid and list render the same entries twice (two views of one data set),
+    // so count/empty-state must dedupe against a single view's nodes.
+    const primaryCards = cards.filter((c) => c.closest("#grid-view"));
+
+    function setView(mode: string) {
+      resultsEl?.setAttribute("data-view", mode);
+      for (const btn of viewToggles) {
+        btn.setAttribute("aria-pressed", String(btn.dataset.viewToggle === mode));
+      }
+      try {
+        localStorage.setItem("catalog-view", mode);
+      } catch {}
+    }
+
+    for (const btn of viewToggles) {
+      btn.addEventListener("click", () => setView(btn.dataset.viewToggle ?? "grid"));
+    }
+    let storedView = "grid";
+    try {
+      storedView = localStorage.getItem("catalog-view") || "grid";
+    } catch {}
+    setView(storedView);
+
+    function applySort() {
+      const key = sort?.value ?? "newest";
+      const byContainer = new Map<Element, HTMLElement[]>();
+      for (const card of cards) {
+        const parent = card.parentElement;
+        if (!parent) continue;
+        if (!byContainer.has(parent)) byContainer.set(parent, []);
+        byContainer.get(parent)!.push(card);
+      }
+      for (const [parent, group] of byContainer) {
+        const sorted = [...group].sort((a, b) => {
+          if (key === "stars") {
+            return Number(b.dataset.stars ?? 0) - Number(a.dataset.stars ?? 0);
+          }
+          return Number(b.dataset.added ?? 0) - Number(a.dataset.added ?? 0);
+        });
+        for (const el of sorted) parent.appendChild(el);
+      }
+    }
 
     let activeCategory = bar.dataset.presetCategory || "all";
 
     function syncUrl() {
       const params = new URLSearchParams();
       if (search?.value) params.set("q", search.value);
+      if (sort?.value && sort.value !== "newest") params.set("sort", sort.value);
       if (activeCategory !== "all") params.set("category", activeCategory);
       if (pricing?.value && pricing.value !== "all") params.set("pricing", pricing.value);
       if (client?.value && client.value !== "all") params.set("client", client.value);
@@ -129,6 +212,7 @@ const noun = type === "skills" ? "skills" : "MCP servers";
     }
 
     function apply() {
+      applySort();
       const q = (search?.value ?? "").trim().toLowerCase();
       let visible = 0;
 
@@ -147,10 +231,10 @@ const noun = type === "skills" ? "skills" : "MCP servers";
         const isVisible =
           matchesQuery && matchesCategory && matchesPricing && matchesClient && matchesRuntime;
         card.hidden = !isVisible;
-        if (isVisible) visible += 1;
+        if (isVisible && primaryCards.includes(card)) visible += 1;
       }
 
-      if (countEl) countEl.textContent = `Showing ${visible} of ${cards.length}`;
+      if (countEl) countEl.textContent = `Showing ${visible} of ${primaryCards.length}`;
       if (emptyState) emptyState.hidden = visible !== 0;
       syncUrl();
     }
@@ -164,6 +248,7 @@ const noun = type === "skills" ? "skills" : "MCP servers";
     }
 
     search?.addEventListener("input", apply);
+    sort?.addEventListener("change", apply);
     pricing?.addEventListener("change", apply);
     client?.addEventListener("change", apply);
     runtime?.addEventListener("change", apply);
@@ -174,6 +259,7 @@ const noun = type === "skills" ? "skills" : "MCP servers";
     // Initialize from URL query params (progressive enhancement).
     const initial = new URLSearchParams(location.search);
     if (initial.has("q") && search) search.value = initial.get("q") ?? "";
+    if (initial.has("sort") && sort) sort.value = initial.get("sort") ?? "newest";
     if (initial.has("pricing") && pricing) pricing.value = initial.get("pricing") ?? "all";
     if (initial.has("client") && client) client.value = initial.get("client") ?? "all";
     if (initial.has("runtime") && runtime) runtime.value = initial.get("runtime") ?? "all";

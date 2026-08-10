@@ -4,6 +4,7 @@ import Layout from "../../layouts/Layout.astro";
 import Section from "../../components/Section.astro";
 import FilterBar from "../../components/FilterBar.astro";
 import EntryCard from "../../components/EntryCard.astro";
+import EntryRow from "../../components/EntryRow.astro";
 
 const skills = (await getCollection("skills")).sort(
   (a, b) => b.data.addedDate.valueOf() - a.data.addedDate.valueOf(),
@@ -45,8 +46,13 @@ const jsonLd = {
     description="Instructions, scripts, and resources Claude loads on demand to handle a specific task well — documents, design, testing, and more."
   >
     <FilterBar type="skills" />
-    <div class="mt-xl grid grid-cols-1 gap-lg sm:grid-cols-2 lg:grid-cols-3">
-      {skills.map((entry) => <EntryCard entry={entry} type="skills" />)}
+    <div id="results" data-view="grid" class="mt-xl">
+      <div id="grid-view" class="grid grid-cols-1 gap-lg sm:grid-cols-2 lg:grid-cols-3">
+        {skills.map((entry) => <EntryCard entry={entry} type="skills" />)}
+      </div>
+      <div id="list-view" data-view="list" class="rounded-md border border-hairline bg-canvas">
+        {skills.map((entry) => <EntryRow entry={entry} type="skills" />)}
+      </div>
     </div>
     <div
       id="empty-state"

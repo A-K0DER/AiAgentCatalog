@@ -22,6 +22,8 @@ pricing: free
 license: MIT
 author: "Anthropic / Model Context Protocol"
 featured: false
+officialHosted: true
+githubStars: 89404
 addedDate: 2026-05-20
 ---
 

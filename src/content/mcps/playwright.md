@@ -27,6 +27,8 @@ pricing: free
 license: Apache-2.0
 author: Microsoft
 featured: true
+officialHosted: true
+githubStars: 35969
 addedDate: 2026-07-15
 ---
 

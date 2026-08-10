@@ -17,6 +17,7 @@ pricing: free
 license: "Source-available — see repository LICENSE"
 author: Anthropic
 featured: true
+githubStars: 167407
 addedDate: 2026-06-20
 ---
 

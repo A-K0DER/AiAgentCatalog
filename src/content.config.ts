@@ -27,6 +27,8 @@ const entrySchema = z.object({
   license: z.string().optional(),
   author: z.string().optional(),
   featured: z.boolean().default(false),
+  officialHosted: z.boolean().default(false),
+  githubStars: z.number().int().nonnegative().optional(),
   addedDate: z.coerce.date(),
 });
 

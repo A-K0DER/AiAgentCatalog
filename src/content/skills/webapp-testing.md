@@ -17,6 +17,7 @@ pricing: free
 license: "Complete terms in repository LICENSE.txt"
 author: Anthropic
 featured: false
+githubStars: 167407
 addedDate: 2026-07-10
 ---
 
