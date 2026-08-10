@@ -77,24 +77,26 @@ const noun = type === "skills" ? "skills" : "MCP servers";
         </select>
       )}
 
-      <div class="flex h-10 shrink-0 items-center rounded-sm border border-hairline p-0.5" role="group" aria-label="View mode">
-        <button
-          type="button"
-          data-view-toggle="grid"
-          class="view-toggle-btn inline-flex h-full items-center rounded-xs px-sm text-body-sm transition-colors duration-150"
-          aria-pressed="true"
-        >
-          Grid
-        </button>
-        <button
-          type="button"
-          data-view-toggle="list"
-          class="view-toggle-btn inline-flex h-full items-center rounded-xs px-sm text-body-sm transition-colors duration-150"
-          aria-pressed="false"
-        >
-          List
-        </button>
-      </div>
+      {type === "mcps" && (
+        <div class="flex h-10 shrink-0 items-center rounded-sm border border-hairline p-0.5" role="group" aria-label="View mode">
+          <button
+            type="button"
+            data-view-toggle="grid"
+            class="view-toggle-btn inline-flex h-full items-center rounded-xs px-sm text-body-sm transition-colors duration-150"
+            aria-pressed="true"
+          >
+            Grid
+          </button>
+          <button
+            type="button"
+            data-view-toggle="list"
+            class="view-toggle-btn inline-flex h-full items-center rounded-xs px-sm text-body-sm transition-colors duration-150"
+            aria-pressed="false"
+          >
+            List
+          </button>
+        </div>
+      )}
     </div>
   </div>
 
