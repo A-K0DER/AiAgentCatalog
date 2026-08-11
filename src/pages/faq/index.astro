@@ -1,0 +1,26 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Section from "../../components/Section.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import Faq from "../../components/Faq.astro";
+import { FAQ_ITEMS } from "../../data/faq";
+---
+
+<Layout
+  title="Frequently Asked Questions"
+  description="Answers on AI agent skills, MCP servers, and how Claude, ChatGPT, Gemini, Cursor, Copilot, Windsurf, and Cline compare."
+  keywords={["AI agent skills FAQ", "MCP server FAQ", "AI agent skills questions", "Claude vs ChatGPT vs Gemini"]}
+>
+  <Section>
+    <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "FAQ" }]} class="mb-lg" />
+
+    <h1 class="text-display-xl text-ink">Frequently Asked Questions</h1>
+    <p class="mt-sm max-w-[42rem] text-body-lg text-body">
+      Agent skills, MCP servers, and where Claude, ChatGPT, Gemini, Cursor, Copilot, Windsurf, and Cline fit in — answered in one place.
+    </p>
+
+    <div class="mt-2xl">
+      <Faq items={FAQ_ITEMS} />
+    </div>
+  </Section>
+</Layout>
