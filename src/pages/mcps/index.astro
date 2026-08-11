@@ -5,6 +5,7 @@ import Section from "../../components/Section.astro";
 import FilterBar from "../../components/FilterBar.astro";
 import EntryCard from "../../components/EntryCard.astro";
 import EntryRow from "../../components/EntryRow.astro";
+import Icon from "../../components/Icon.astro";
 
 const allMcps = (await getCollection("mcps")).sort(
   (a, b) => b.data.addedDate.valueOf() - a.data.addedDate.valueOf(),
@@ -39,6 +40,24 @@ const jsonLd = {
   ]}
   jsonLd={jsonLd}
 >
+  <div id="stack-intro-banner" class="border-b border-hairline bg-canvas-soft">
+    <div class="container-page flex items-center justify-between gap-md py-sm">
+      <p class="flex items-center gap-xs text-body-sm text-body">
+        <Icon name="box" size={16} class="hidden shrink-0 text-mute sm:block" />
+        Building a setup? Tap <strong class="text-ink">+</strong> on any server below to add it to your stack, then export
+        a ready-to-paste config from the <strong class="text-ink">Stack</strong> button.
+      </p>
+      <button
+        type="button"
+        id="stack-intro-dismiss"
+        aria-label="Dismiss"
+        class="shrink-0 rounded-full p-1 text-mute hover:bg-canvas-soft-2 hover:text-ink"
+      >
+        <Icon name="x" size={14} />
+      </button>
+    </div>
+  </div>
+
   {officialMcps.length > 0 && (
     <Section
       eyebrow="Official & hosted"
@@ -75,3 +94,24 @@ const jsonLd = {
     </div>
   </Section>
 </Layout>
+
+<script>
+  const DISMISS_KEY = "stack-intro-dismissed";
+  const banner = document.getElementById("stack-intro-banner");
+  const dismissBtn = document.getElementById("stack-intro-dismiss");
+
+  try {
+    if (localStorage.getItem(DISMISS_KEY) === "1" && banner) banner.hidden = true;
+  } catch {
+    /* localStorage unavailable — leave banner visible */
+  }
+
+  dismissBtn?.addEventListener("click", () => {
+    if (banner) banner.hidden = true;
+    try {
+      localStorage.setItem(DISMISS_KEY, "1");
+    } catch {
+      /* localStorage unavailable — dismissal won't persist */
+    }
+  });
+</script>

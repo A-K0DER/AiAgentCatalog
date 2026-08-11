@@ -1,7 +1,9 @@
 ---
+import { getCollection } from "astro:content";
 import "../styles/global.css";
 import Nav from "../components/Nav.astro";
 import Footer from "../components/Footer.astro";
+import StackWidget from "../components/StackWidget.astro";
 
 interface Props {
   title: string;
@@ -57,6 +59,13 @@ const organizationJsonLd = {
 };
 
 const jsonLdList = [organizationJsonLd, ...(jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [])];
+
+const stackCatalog = (await getCollection("mcps")).map((entry) => ({
+  id: entry.id,
+  name: entry.data.name,
+  installCommand: entry.data.installCommand ?? null,
+  envVars: entry.data.envVars,
+}));
 ---
 
 <!doctype html>
@@ -134,5 +143,7 @@ const jsonLdList = [organizationJsonLd, ...(jsonLd ? (Array.isArray(jsonLd) ? js
       <slot />
     </main>
     <Footer />
+    <script type="application/json" id="stack-catalog-data" set:html={JSON.stringify(stackCatalog)} />
+    <StackWidget />
   </body>
 </html>

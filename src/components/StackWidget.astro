@@ -1,0 +1,147 @@
+---
+import Icon from "./Icon.astro";
+---
+
+<div id="stack-widget" class="fixed bottom-lg right-lg z-[60]">
+  <button
+    type="button"
+    id="stack-widget-toggle"
+    title="Build a bundle of MCP servers, then export one config file for your client"
+    class="inline-flex h-12 items-center gap-2 rounded-pill bg-primary pl-md pr-sm text-button-md text-on-primary shadow-5 transition-colors duration-150 hover:bg-ink/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link"
+    aria-haspopup="dialog"
+    aria-expanded="false"
+    aria-controls="stack-drawer"
+    aria-label="Open MCP stack (0 items)"
+  >
+    <Icon name="box" size={18} />
+    <span>Stack</span>
+    <span
+      id="stack-widget-count"
+      class="hidden min-w-[1.25rem] rounded-full bg-on-primary px-1.5 text-center text-caption leading-5 text-primary"
+    >
+      0
+    </span>
+  </button>
+
+  <div
+    id="stack-drawer"
+    role="dialog"
+    aria-label="Your MCP stack"
+    hidden
+    class="absolute bottom-[calc(100%+12px)] right-0 flex max-h-[70vh] w-[22rem] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-lg border border-hairline bg-canvas shadow-5"
+  >
+    <div class="flex items-center justify-between border-b border-hairline px-lg py-sm">
+      <span class="text-body-sm-strong text-ink">Your Stack</span>
+      <button
+        type="button"
+        id="stack-drawer-close"
+        aria-label="Close"
+        class="rounded-full p-1 text-mute hover:bg-canvas-soft hover:text-ink"
+      >
+        <Icon name="x" size={16} />
+      </button>
+    </div>
+
+    <ul id="stack-drawer-list" class="flex-1 overflow-y-auto"></ul>
+
+    <p id="stack-drawer-empty" class="px-lg py-lg text-body-sm text-mute">
+      No servers added yet. Browse the <a href="/mcps/" class="text-link hover:underline">MCP directory</a> and tap
+      "Add to Stack."
+    </p>
+
+    <div class="border-t border-hairline p-md">
+      <a
+        id="stack-drawer-export"
+        href="/stack/"
+        class="inline-flex h-10 w-full items-center justify-center rounded-pill bg-primary text-button-md text-on-primary hover:bg-ink/90"
+      >
+        Export Config
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { getStack, removeFromStack, STACK_CHANGE_EVENT } from "../lib/stack.client";
+
+  interface CatalogEntry {
+    id: string;
+    name: string;
+    installCommand: string | null;
+    envVars: unknown[];
+  }
+
+  function readCatalog(): CatalogEntry[] {
+    try {
+      return JSON.parse(document.getElementById("stack-catalog-data")?.textContent ?? "[]");
+    } catch {
+      return [];
+    }
+  }
+
+  const catalog = readCatalog();
+  const toggle = document.getElementById("stack-widget-toggle") as HTMLButtonElement | null;
+  const drawer = document.getElementById("stack-drawer");
+  const closeBtn = document.getElementById("stack-drawer-close");
+  const countBadge = document.getElementById("stack-widget-count");
+  const list = document.getElementById("stack-drawer-list");
+  const empty = document.getElementById("stack-drawer-empty");
+
+  function render() {
+    const ids = getStack();
+
+    if (countBadge) {
+      countBadge.textContent = String(ids.length);
+      countBadge.classList.toggle("hidden", ids.length === 0);
+    }
+    toggle?.setAttribute("aria-label", `Open MCP stack (${ids.length} items)`);
+
+    if (!list || !empty) return;
+    list.innerHTML = "";
+    empty.hidden = ids.length !== 0;
+
+    for (const id of ids) {
+      const meta = catalog.find((c) => c.id === id);
+      const displayName = meta?.name ?? id;
+
+      const li = document.createElement("li");
+      li.className = "flex items-center justify-between gap-sm border-b border-hairline px-lg py-sm last:border-b-0";
+
+      const nameSpan = document.createElement("span");
+      nameSpan.className = "truncate text-body-sm text-ink";
+      nameSpan.textContent = displayName;
+
+      const removeBtn = document.createElement("button");
+      removeBtn.type = "button";
+      removeBtn.setAttribute("aria-label", `Remove ${displayName}`);
+      removeBtn.className = "shrink-0 rounded-full p-1 text-mute hover:bg-canvas-soft hover:text-ink";
+      removeBtn.textContent = "✕";
+      removeBtn.addEventListener("click", () => removeFromStack(id));
+
+      li.append(nameSpan, removeBtn);
+      list.appendChild(li);
+    }
+  }
+
+  function setOpen(open: boolean) {
+    if (!drawer || !toggle) return;
+    drawer.hidden = !open;
+    toggle.setAttribute("aria-expanded", String(open));
+  }
+
+  toggle?.addEventListener("click", () => setOpen(drawer?.hidden !== false));
+  closeBtn?.addEventListener("click", () => setOpen(false));
+
+  document.addEventListener("click", (e) => {
+    if (!drawer || drawer.hidden) return;
+    const target = e.target as Node;
+    if (!drawer.contains(target) && target !== toggle && !toggle?.contains(target)) setOpen(false);
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") setOpen(false);
+  });
+
+  render();
+  window.addEventListener(STACK_CHANGE_EVENT, render);
+</script>

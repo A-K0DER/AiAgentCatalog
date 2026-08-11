@@ -3,6 +3,7 @@ import type { CollectionEntry } from "astro:content";
 import VerificationBadge from "./VerificationBadge.astro";
 import Badge from "./Badge.astro";
 import Icon from "./Icon.astro";
+import StackToggleButton from "./StackToggleButton.astro";
 import { getCategory } from "../data/categories";
 import { formatCount } from "../lib/format";
 
@@ -27,9 +28,8 @@ const extraCount = categories.length - visibleCategories.length;
 const pricingLabel = { free: "Free", freemium: "Freemium", paid: "Paid" }[pricing];
 ---
 
-<a
-  href={`/${type}/${entry.id}/`}
-  class="group flex flex-col gap-md rounded-md border border-hairline bg-canvas p-lg shadow-3 transition-shadow duration-150 hover:shadow-4 hover:border-hairline-strong"
+<div
+  class="group relative flex flex-col gap-md rounded-md border border-hairline bg-canvas p-lg shadow-3 transition-shadow duration-150 hover:shadow-4 hover:border-hairline-strong"
   data-entry
   data-name={name.toLowerCase()}
   data-tagline={tagline.toLowerCase()}
@@ -40,32 +40,43 @@ const pricingLabel = { free: "Free", freemium: "Freemium", paid: "Paid" }[pricin
   data-stars={githubStars ?? 0}
   data-added={addedDate.valueOf()}
 >
-  <div class="flex items-start justify-between gap-sm">
-    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-canvas-soft-2 text-body-sm-strong text-ink">
-      {initials}
+  <a href={`/${type}/${entry.id}/`} class="absolute inset-0 z-0 rounded-md" aria-label={name}></a>
+
+  <div class="pointer-events-none relative z-10 flex flex-col gap-md">
+    <div class="flex items-start justify-between gap-sm">
+      <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-canvas-soft-2 text-body-sm-strong text-ink">
+        {initials}
+      </div>
+      <div class="flex items-center gap-xs">
+        <VerificationBadge status={verification} />
+        {type === "mcps" && (
+          <div class="pointer-events-auto">
+            <StackToggleButton id={entry.id} size="icon" />
+          </div>
+        )}
+      </div>
     </div>
-    <VerificationBadge status={verification} />
-  </div>
 
-  <div class="flex flex-col gap-xxs">
-    <h3 class="text-display-sm text-ink">{name}</h3>
-    <p class="text-body-sm text-body line-clamp-2">{tagline}</p>
-  </div>
+    <div class="flex flex-col gap-xxs">
+      <h3 class="text-display-sm text-ink">{name}</h3>
+      <p class="text-body-sm text-body line-clamp-2">{tagline}</p>
+    </div>
 
-  <div class="mt-auto flex flex-wrap items-center gap-xs pt-xs">
-    {visibleCategories.map((slug) => {
-      const cat = getCategory(slug);
-      return cat ? <Badge>{cat.label}</Badge> : null;
-    })}
-    {extraCount > 0 && <Badge>+{extraCount}</Badge>}
-    {githubStars != null && (
-      <span class="inline-flex items-center gap-1 text-caption text-mute">
-        <Icon name="star" size={12} class="text-mute" />
-        {formatCount(githubStars)}
-      </span>
-    )}
-    <Badge variant={pricing === "free" ? "default" : "violet"} class="ml-auto">
-      {pricingLabel}
-    </Badge>
+    <div class="mt-auto flex flex-wrap items-center gap-xs pt-xs">
+      {visibleCategories.map((slug) => {
+        const cat = getCategory(slug);
+        return cat ? <Badge>{cat.label}</Badge> : null;
+      })}
+      {extraCount > 0 && <Badge>+{extraCount}</Badge>}
+      {githubStars != null && (
+        <span class="inline-flex items-center gap-1 text-caption text-mute">
+          <Icon name="star" size={12} class="text-mute" />
+          {formatCount(githubStars)}
+        </span>
+      )}
+      <Badge variant={pricing === "free" ? "default" : "violet"} class="ml-auto">
+        {pricingLabel}
+      </Badge>
+    </div>
   </div>
-</a>
+</div>

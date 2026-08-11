@@ -1,0 +1,290 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Section from "../../components/Section.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import Icon from "../../components/Icon.astro";
+---
+
+<Layout
+  title="Export Your MCP Stack"
+  description="Generate a ready-to-paste mcpServers JSON config for Claude Desktop, Cursor, Cline, or Windsurf from the MCP servers in your stack."
+  noIndex
+>
+  <Section>
+    <Breadcrumbs items={[{ label: "MCPs", href: "/mcps/" }, { label: "Stack Export" }]} class="mb-lg" />
+
+    <h1 class="text-display-xl text-ink">Export Your MCP Stack</h1>
+    <p class="mt-sm max-w-[42rem] text-body-lg text-body">
+      Pick a client below to get a ready-to-paste config for every server in your stack.
+    </p>
+
+    <div
+      id="stack-export-empty"
+      hidden
+      class="mt-2xl rounded-lg border border-dashed border-hairline-strong px-lg py-3xl text-center"
+    >
+      <p class="text-body-md-strong text-ink">Your stack is empty</p>
+      <p class="mt-xxs text-body-sm text-body">
+        Add MCP servers from the <a href="/mcps/" class="text-link hover:underline">directory</a> first.
+      </p>
+    </div>
+
+    <div id="stack-export-content" hidden class="mt-2xl grid grid-cols-1 gap-2xl lg:grid-cols-[1fr_320px]">
+      <div class="flex flex-col gap-lg">
+        <div id="stack-tabs" role="tablist" class="flex flex-wrap gap-xs" aria-label="Config format"></div>
+        <p id="stack-path-note" class="font-mono text-caption-mono text-mute"></p>
+
+        <div class="overflow-hidden rounded-md bg-primary text-on-primary">
+          <div class="flex items-center justify-between border-b border-on-primary/10 px-lg py-xs">
+            <span id="stack-filename" class="font-mono text-caption-mono text-on-primary/50"></span>
+            <div class="flex items-center gap-xs">
+              <button
+                type="button"
+                id="stack-copy-btn"
+                class="inline-flex items-center gap-1 rounded-sm px-xs py-xxs text-caption-mono text-on-primary/60 hover:text-on-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-on-primary"
+              >
+                <Icon name="copy" size={14} /> Copy
+              </button>
+              <button
+                type="button"
+                id="stack-download-btn"
+                class="inline-flex items-center gap-1 rounded-sm px-xs py-xxs text-caption-mono text-on-primary/60 hover:text-on-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-on-primary"
+              >
+                <Icon name="download" size={14} /> Download
+              </button>
+            </div>
+          </div>
+          <pre class="overflow-x-auto px-lg py-md"><code id="stack-json-output" class="font-mono text-code"></code></pre>
+        </div>
+
+        <div
+          id="stack-missing-note"
+          hidden
+          class="rounded-sm border border-warning-soft bg-warning-soft px-md py-sm text-body-sm text-warning-deep"
+        ></div>
+      </div>
+
+      <aside class="flex flex-col gap-lg">
+        <div>
+          <h2 class="mb-sm text-body-sm-strong text-ink">In Your Stack</h2>
+          <ul id="stack-items-list" class="flex flex-col gap-xs"></ul>
+        </div>
+        <div>
+          <h2 class="mb-sm text-body-sm-strong text-ink">Environment Variables</h2>
+          <p class="mb-sm text-caption text-mute">
+            Values stay on this page only — they're never saved to your browser or shared.
+          </p>
+          <div id="stack-env-inputs" class="flex flex-col gap-md"></div>
+        </div>
+      </aside>
+    </div>
+  </Section>
+</Layout>
+
+<script>
+  import { getStack, removeFromStack, STACK_CHANGE_EVENT } from "../../lib/stack.client";
+  import {
+    EXPORT_FORMATS,
+    buildMcpServersJson,
+    parseInstallCommand,
+    type StackEntryMeta,
+    type ExportFormat,
+  } from "../../lib/mcpConfig";
+
+  interface CatalogEntry extends StackEntryMeta {
+    name: string;
+  }
+
+  function readCatalog(): CatalogEntry[] {
+    try {
+      return JSON.parse(document.getElementById("stack-catalog-data")?.textContent ?? "[]");
+    } catch {
+      return [];
+    }
+  }
+
+  const catalog = readCatalog();
+  let activeFormat: ExportFormat["slug"] = EXPORT_FORMATS[0].slug;
+  const envValues: Record<string, Record<string, string>> = {};
+
+  const tabsEl = document.getElementById("stack-tabs");
+  const pathNoteEl = document.getElementById("stack-path-note");
+  const filenameEl = document.getElementById("stack-filename");
+  const outputEl = document.getElementById("stack-json-output");
+  const copyBtn = document.getElementById("stack-copy-btn") as HTMLButtonElement | null;
+  const downloadBtn = document.getElementById("stack-download-btn");
+  const missingNote = document.getElementById("stack-missing-note");
+  const itemsList = document.getElementById("stack-items-list");
+  const envInputs = document.getElementById("stack-env-inputs");
+  const emptyEl = document.getElementById("stack-export-empty");
+  const contentEl = document.getElementById("stack-export-content");
+
+  function currentEntries(): CatalogEntry[] {
+    const ids = getStack();
+    return ids
+      .map((id) => catalog.find((c) => c.id === id))
+      .filter((e): e is CatalogEntry => Boolean(e));
+  }
+
+  // Build tabs once.
+  if (tabsEl) {
+    for (const fmt of EXPORT_FORMATS) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.setAttribute("role", "tab");
+      btn.dataset.formatTab = fmt.slug;
+      btn.textContent = fmt.label;
+      btn.className =
+        "format-tab-btn inline-flex h-9 items-center rounded-pill-sm border border-hairline px-md text-body-sm transition-colors duration-150";
+      btn.addEventListener("click", () => {
+        activeFormat = fmt.slug;
+        renderOutput();
+      });
+      tabsEl.appendChild(btn);
+    }
+  }
+
+  function renderEnvInputs(entries: CatalogEntry[]) {
+    if (!envInputs) return;
+    envInputs.innerHTML = "";
+    for (const e of entries) {
+      if (e.envVars.length === 0) continue;
+
+      const group = document.createElement("div");
+      const title = document.createElement("p");
+      title.className = "text-body-sm-strong text-ink";
+      title.textContent = e.name;
+      group.appendChild(title);
+
+      for (const v of e.envVars) {
+        const wrap = document.createElement("label");
+        wrap.className = "mt-xxs flex flex-col gap-1";
+
+        const labelText = document.createElement("span");
+        labelText.className = "font-mono text-caption-mono text-mute";
+        labelText.textContent = `${v.name}${v.required ? " (required)" : ""}`;
+
+        const input = document.createElement("input");
+        input.type = "text";
+        input.autocomplete = "off";
+        input.spellcheck = false;
+        input.className =
+          "h-9 rounded-sm border border-hairline bg-canvas px-sm text-body-sm text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link";
+        input.value = envValues[e.id]?.[v.name] ?? "";
+        input.addEventListener("input", () => {
+          envValues[e.id] ??= {};
+          envValues[e.id][v.name] = input.value;
+          renderOutput();
+        });
+
+        wrap.append(labelText, input);
+        group.appendChild(wrap);
+      }
+      envInputs.appendChild(group);
+    }
+  }
+
+  function renderItemsList(entries: CatalogEntry[]) {
+    if (!itemsList) return;
+    itemsList.innerHTML = "";
+    for (const e of entries) {
+      const li = document.createElement("li");
+      li.className = "flex items-center justify-between gap-sm rounded-sm border border-hairline px-sm py-xs";
+
+      const name = document.createElement("span");
+      name.className = "truncate text-body-sm text-ink";
+      name.textContent = e.name;
+
+      const removeBtn = document.createElement("button");
+      removeBtn.type = "button";
+      removeBtn.setAttribute("aria-label", `Remove ${e.name}`);
+      removeBtn.className = "shrink-0 text-mute hover:text-ink";
+      removeBtn.textContent = "✕";
+      removeBtn.addEventListener("click", () => removeFromStack(e.id));
+
+      li.append(name, removeBtn);
+      itemsList.appendChild(li);
+    }
+  }
+
+  function renderOutput() {
+    const entries = currentEntries();
+    const fmt = EXPORT_FORMATS.find((f) => f.slug === activeFormat) ?? EXPORT_FORMATS[0];
+
+    tabsEl?.querySelectorAll<HTMLButtonElement>("[data-format-tab]").forEach((btn) => {
+      btn.setAttribute("aria-selected", String(btn.dataset.formatTab === activeFormat));
+    });
+
+    if (pathNoteEl) pathNoteEl.textContent = fmt.path;
+    if (filenameEl) filenameEl.textContent = fmt.filename;
+
+    const json = buildMcpServersJson(entries, envValues);
+    const jsonStr = JSON.stringify(json, null, 2);
+    if (outputEl) outputEl.textContent = jsonStr;
+    copyBtn?.setAttribute("data-code", jsonStr);
+
+    const missing = entries.filter((e) => !e.installCommand || !parseInstallCommand(e.installCommand ?? ""));
+    if (missingNote) {
+      if (missing.length > 0) {
+        missingNote.hidden = false;
+        missingNote.textContent = `No install command available for: ${missing
+          .map((e) => e.name)
+          .join(", ")} — add these manually.`;
+      } else {
+        missingNote.hidden = true;
+      }
+    }
+  }
+
+  function renderAll() {
+    const entries = currentEntries();
+    const isEmpty = entries.length === 0;
+    if (emptyEl) emptyEl.hidden = !isEmpty;
+    if (contentEl) contentEl.hidden = isEmpty;
+    if (isEmpty) return;
+
+    renderItemsList(entries);
+    renderEnvInputs(entries);
+    renderOutput();
+  }
+
+  copyBtn?.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(copyBtn.getAttribute("data-code") ?? "");
+      const original = copyBtn.innerHTML;
+      copyBtn.textContent = "Copied";
+      setTimeout(() => {
+        copyBtn.innerHTML = original;
+      }, 1500);
+    } catch {
+      /* clipboard unavailable — no-op */
+    }
+  });
+
+  downloadBtn?.addEventListener("click", () => {
+    const fmt = EXPORT_FORMATS.find((f) => f.slug === activeFormat) ?? EXPORT_FORMATS[0];
+    const blob = new Blob([outputEl?.textContent ?? ""], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fmt.filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  });
+
+  renderAll();
+  window.addEventListener(STACK_CHANGE_EVENT, renderAll);
+</script>
+
+<style>
+  .format-tab-btn[aria-selected="true"] {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    border-color: var(--color-primary);
+  }
+  .format-tab-btn[aria-selected="false"]:hover {
+    background-color: var(--color-canvas-soft);
+  }
+</style>

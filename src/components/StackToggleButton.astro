@@ -1,0 +1,75 @@
+---
+import Icon from "./Icon.astro";
+
+interface Props {
+  id: string;
+  size?: "icon" | "full";
+  class?: string;
+}
+
+const { id, size = "icon", class: className = "" } = Astro.props;
+---
+
+<button
+  type="button"
+  data-stack-toggle={id}
+  aria-pressed="false"
+  aria-label="Add to stack"
+  title="Add to stack — build a bundle of servers to export as one config file"
+  class={`stack-toggle-btn inline-flex shrink-0 items-center justify-center gap-1 rounded-full border border-hairline bg-canvas text-body transition-colors duration-150 hover:border-hairline-strong hover:bg-canvas-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link ${
+    size === "icon" ? "h-9 w-9" : "h-12 px-md text-button-md"
+  } ${className}`}
+>
+  <span class="stack-toggle-icon-add inline-flex items-center">
+    <Icon name="plus" size={size === "icon" ? 16 : 18} />
+  </span>
+  <span class="stack-toggle-icon-added inline-flex items-center">
+    <Icon name="check" size={size === "icon" ? 16 : 18} />
+  </span>
+  {size === "full" && <span class="stack-toggle-label">Add to Stack</span>}
+</button>
+
+<style>
+  .stack-toggle-btn[aria-pressed="true"] {
+    border-color: var(--color-primary);
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+  }
+  .stack-toggle-btn[aria-pressed="false"] .stack-toggle-icon-added,
+  .stack-toggle-btn[aria-pressed="true"] .stack-toggle-icon-add {
+    display: none;
+  }
+</style>
+
+<script>
+  import { isInStack, toggleStack, STACK_CHANGE_EVENT } from "../lib/stack.client";
+
+  function syncButton(btn: HTMLButtonElement) {
+    const id = btn.dataset.stackToggle;
+    if (!id) return;
+    const active = isInStack(id);
+    btn.setAttribute("aria-pressed", String(active));
+    btn.setAttribute("aria-label", active ? "Remove from stack" : "Add to stack");
+    btn.title = active
+      ? "In your stack — click to remove"
+      : "Add to stack — build a bundle of servers to export as one config file";
+    const label = btn.querySelector(".stack-toggle-label");
+    if (label) label.textContent = active ? "In Stack" : "Add to Stack";
+  }
+
+  function syncAll() {
+    document.querySelectorAll<HTMLButtonElement>("[data-stack-toggle]").forEach(syncButton);
+  }
+
+  document.querySelectorAll<HTMLButtonElement>("[data-stack-toggle]").forEach((btn) => {
+    syncButton(btn);
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const id = btn.dataset.stackToggle;
+      if (id) toggleStack(id);
+    });
+  });
+
+  window.addEventListener(STACK_CHANGE_EVENT, syncAll);
+</script>

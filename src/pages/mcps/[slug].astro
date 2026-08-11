@@ -9,6 +9,7 @@ import MetaTable from "../../components/MetaTable.astro";
 import EntryCard from "../../components/EntryCard.astro";
 import CodeBlock from "../../components/CodeBlock.astro";
 import Icon from "../../components/Icon.astro";
+import StackToggleButton from "../../components/StackToggleButton.astro";
 import { getCategory } from "../../data/categories";
 
 export async function getStaticPaths() {
@@ -83,14 +84,17 @@ const jsonLd = {
         <p class="max-w-[42rem] text-body-lg text-body">{tagline}</p>
       </div>
 
-      <a
-        href={sourceUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        class="inline-flex h-12 shrink-0 items-center gap-2 rounded-pill bg-primary px-sm text-button-lg text-on-primary hover:bg-ink/90"
-      >
-        View Source <Icon name="external-link" size={16} />
-      </a>
+      <div class="flex shrink-0 items-center gap-sm">
+        <StackToggleButton id={entry.id} size="full" />
+        <a
+          href={sourceUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex h-12 shrink-0 items-center gap-2 rounded-pill bg-primary px-sm text-button-lg text-on-primary hover:bg-ink/90"
+        >
+          View Source <Icon name="external-link" size={16} />
+        </a>
+      </div>
     </div>
 
     {installCommand && (
